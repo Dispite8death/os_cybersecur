@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Файловый менеджер · DAC vs MAC</title>
+    <link rel="stylesheet" href="FileManager.css">
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <span class="logo">📁 Файловый менеджер · DAC vs MAC</span>
+            <nav>
+                <ul>
+                    <li><a href="AccessСontrol.html">Теория</a></li>
+                    <li><a href="Practice.html">Сценарии</a></li>
+                    <li><a href="#mode">Режим</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <h1>Интерактивная файловая система</h1>
+    <p class="note">
+        Переключайтесь между режимами DAC и MAC, меняйте пользователя/контекст и пробуйте выполнять действия
+    </p>
+
+    <!-- Переключатель режима -->
+    <section id="mode">
+        <div class="card mode-selector">
+            <div class="mode-toggle">
+                <button id="mode-dac" class="mode-btn active" onclick="switchMode('dac')">
+                    <span class="badge dac">DAC</span>
+                    Дискреционный контроль
+                </button>
+                <button id="mode-mac" class="mode-btn" onclick="switchMode('mac')">
+                    <span class="badge mac">MAC</span>
+                    Мандатный контроль
+                </button>
+            </div>
+
+            <div class="user-selector">
+                <label>Текущий пользователь / Контекст:</label>
+                <select id="current-user">
+                    <!-- Заполняется из JS -->
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Файловый менеджер -->
+    <section id="filesystem">
+        <div class="card">
+            <div class="path-bar">
+                <span id="current-path">/</span>
+                <button class="btn-primary" onclick="createFile()" id="btn-create">➕ Создать файл</button>
+                <button class="btn-primary" onclick="createDirectory()" id="btn-mkdir">📁 Создать папку</button>
+            </div>
+
+            <div class="file-list" id="file-list">
+                <!-- Заполняется из JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Лог действий -->
+    <section id="action-log">
+        <div class="card">
+            <h3>История действий</h3>
+            <div class="logs" id="logs">
+                <div class="log-entry log-info">Добро пожаловать! Выберите режим и начните исследовать файловую систему.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Подсказки -->
+    <section>
+        <h2>Как использовать</h2>
+        <div class="card">
+            <ol style="margin-left: 2rem; line-height: 2;">
+                <li><strong>Выберите режим</strong> — DAC (классические права) или MAC (мандатный контроль)</li>
+                <li><strong>Выберите пользователя/контекст</strong> — от имени кого вы работаете</li>
+                <li><strong>Наведите на файл</strong> — увидите права доступа и возможные действия</li>
+                <li><strong>Кликните на действие</strong> (👀 Чтение, ✏️ Запись, 🗑️ Удаление) — система покажет результат</li>
+                <li><strong>Переходите в папки</strong> — кликните на папку, чтобы открыть её</li>
+                <li><strong>Создавайте файлы/папки</strong> — кнопки вверху позволяют добавлять новые объекты</li>
+            </ol>
+
+            <div class="legend-card">
+                <h4>Легенда иконок:</h4>
+                <div class="legend-row">
+                    <span class="legend-item"><span class="icon">📁</span> Папка</span>
+                    <span class="legend-item"><span class="icon">📄</span> Файл</span>
+                    <span class="legend-item"><span class="icon">⚙️</span> Исполняемый</span>
+                </div>
+                <div class="legend-row">
+                    <span class="legend-item"><span class="icon">👀</span> Чтение</span>
+                    <span class="legend-item"><span class="icon">✏️</span> Запись</span>
+                    <span class="legend-item"><span class="icon">🗑️</span> Удаление</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <p>Интерактивный файловый менеджер · Механизмы контроля доступа</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Исследуйте разницу между DAC и MAC на практике</p>
+    </div>
+</footer>
+
+<script src="FileManager.js"></script>
+</body>
+</html>

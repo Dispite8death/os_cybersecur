@@ -1,0 +1,871 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #00ff88;
+    --primary-dark: #00cc6a;
+    --secondary: #0099ff;
+    --danger: #ff4d4d;
+    --warning: #ffc107;
+    --dark: #0a0c0f;
+    --darker: #050607;
+    --light: #e0e0e0;
+    --gray: #2a2e35;
+    --card-bg: rgba(20, 25, 35, 0.9);
+    --border: rgba(0, 255, 136, 0.2);
+    --code-bg: #1e1e1e;
+    --success: #00cc6a;
+    --info: #0099ff;
+    --windows: #0078d7;
+    --linux: #4ecdc4;
+    --macos: #8e8e93;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--light);
+    line-height: 1.6;
+    background-color: var(--darker);
+    background-image:
+            linear-gradient(0deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent);
+    background-size: 50px 50px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Шапка */
+header {
+    background: rgba(5, 6, 7, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+nav ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+nav a {
+    color: var(--light);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--primary);
+}
+
+/* Основной контент */
+main {
+    padding: 3rem 0;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-left: 4px solid var(--primary);
+    padding-left: 1.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin: 2.5rem 0 1.5rem;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 1rem;
+    color: var(--secondary);
+}
+
+h4 {
+    font-size: 1.2rem;
+    margin: 1rem 0 0.5rem;
+    color: var(--warning);
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.intro-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+/* Бейджи ОС */
+.kernel-badge {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.badge.windows {
+    background: rgba(0, 120, 215, 0.2);
+    color: var(--windows);
+    border: 1px solid rgba(0, 120, 215, 0.4);
+}
+
+.badge.linux {
+    background: rgba(78, 205, 196, 0.2);
+    color: var(--linux);
+    border: 1px solid rgba(78, 205, 196, 0.4);
+}
+
+.badge.macos {
+    background: rgba(142, 142, 147, 0.2);
+    color: var(--macos);
+    border: 1px solid rgba(142, 142, 147, 0.4);
+}
+
+/* Функции ядра */
+.kernel-functions {
+    margin-left: 2rem;
+    margin-top: 1rem;
+}
+
+.kernel-functions li {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.kernel-functions li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* Типы ядер */
+.kernel-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.kernel-type-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.kernel-type-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.type-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.type-pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.pros ul, .cons ul {
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.pros ul li, .cons ul li {
+    margin-bottom: 0.5rem;
+}
+
+.example-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+/* Диаграмма архитектуры */
+.kernel-diagram {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.diagram-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.diagram-cell {
+    flex: 1;
+    min-width: 250px;
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.diagram-label {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.diagram-layer {
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.monolithic .diagram-layer.kernel-layer {
+    background: rgba(0, 120, 215, 0.2);
+    border: 1px solid rgba(0, 120, 215, 0.4);
+}
+
+.microkernel .diagram-layer.kernel-layer {
+    background: rgba(78, 205, 196, 0.2);
+    border: 1px solid rgba(78, 205, 196, 0.4);
+}
+
+.microkernel .diagram-layer.service-layer {
+    background: rgba(156, 39, 176, 0.2);
+    border: 1px solid rgba(156, 39, 176, 0.4);
+    margin-top: 0.5rem;
+}
+
+.hybrid .diagram-layer.kernel-layer {
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.hybrid .diagram-layer.module-layer {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    margin-top: 0.5rem;
+}
+
+.diagram-layer.hardware-layer {
+    background: rgba(100, 100, 100, 0.3);
+    border: 1px solid #666;
+    font-size: 0.9rem;
+    color: #999;
+}
+
+/* Инициализация ядра */
+.kernel-init-stages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.init-stage {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.init-stage:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.init-stage.active {
+    background: rgba(0, 255, 136, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+.stage-number {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 0 auto 1rem;
+}
+
+/* Карта памяти */
+.memory-map {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.memory-region {
+    display: grid;
+    grid-template-columns: 250px 150px 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.memory-region.kernel {
+    background: rgba(0, 120, 215, 0.1);
+    border-left: 4px solid var(--windows);
+}
+
+.memory-region.user {
+    background: rgba(78, 205, 196, 0.1);
+    border-left: 4px solid var(--linux);
+}
+
+.memory-region.kernel-64 {
+    background: rgba(142, 142, 147, 0.1);
+    border-left: 4px solid var(--macos);
+}
+
+.region-range {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.region-type {
+    font-weight: 500;
+    color: var(--warning);
+}
+
+.region-desc {
+    color: #999;
+}
+
+/* Подсистемы */
+.subsystems-grid {
+    display: grid;
+    grid-template-rows: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.subsystem-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.subsystem-card:hover {
+    transform: translateY(-5px);
+}
+
+.scheduler-types {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.scheduler-type h4 {
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.memory-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.feature-icon {
+    font-size: 1.2rem;
+}
+
+.driver-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.driver-layer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.layer-number {
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.fs-table {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.fs-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fs-row:last-child {
+    border-bottom: none;
+}
+
+.fs-name {
+    font-weight: 600;
+    color: var(--primary);
+    font-family: monospace;
+}
+
+.fs-desc {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Архитектура Windows */
+.windows-architecture {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.arch-layer {
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.user-mode {
+    background: rgba(78, 205, 196, 0.1);
+    border: 1px solid var(--linux);
+}
+
+.kernel-mode {
+    background: rgba(0, 120, 215, 0.1);
+    border: 1px solid var(--windows);
+}
+
+.boundary {
+    text-align: center;
+    padding: 0.5rem;
+    color: var(--warning);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.arch-component {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.executive {
+    background: rgba(255, 193, 7, 0.2);
+}
+
+.kernel {
+    background: rgba(156, 39, 176, 0.2);
+}
+
+.hal {
+    background: rgba(100, 100, 100, 0.3);
+}
+
+.drivers {
+    background: rgba(255, 107, 107, 0.2);
+}
+
+.executive-services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.service-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.service-name {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.service-desc {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Архитектура Linux */
+.linux-architecture {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.user-space {
+    background: rgba(78, 205, 196, 0.1);
+    border: 1px solid var(--linux);
+}
+
+.kernel-space {
+    background: rgba(0, 120, 215, 0.1);
+    border: 1px solid var(--windows);
+}
+
+.scheduler {
+    background: rgba(255, 193, 7, 0.2);
+}
+
+.mmu {
+    background: rgba(156, 39, 176, 0.2);
+}
+
+.vfs {
+    background: rgba(100, 100, 100, 0.3);
+}
+
+.net {
+    background: rgba(255, 107, 107, 0.2);
+}
+
+.drivers {
+    background: rgba(0, 204, 106, 0.2);
+}
+
+.arch {
+    background: rgba(0, 153, 255, 0.2);
+}
+
+.kernel-source-tree {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.source-item {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.source-item:last-child {
+    border-bottom: none;
+}
+
+.source-path {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.source-desc {
+    color: #999;
+}
+
+/* Сравнительная таблица */
+.comparison-table {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 2rem 0;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 250px repeat(3, 1fr);
+    background: rgba(0, 255, 136, 0.1);
+    border-bottom: 2px solid var(--primary);
+    font-weight: 600;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 250px repeat(3, 1fr);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-cell {
+    padding: 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-cell:last-child {
+    border-right: none;
+}
+
+.table-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Полная последовательность загрузки */
+.full-boot-sequence {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.boot-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 120px;
+}
+
+.stage-num {
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    color: var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.stage-name {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.stage-desc {
+    color: #999;
+    font-size: 0.85rem;
+    max-width: 150px;
+}
+
+.boot-stage.kernel-stage .stage-num {
+    background: var(--secondary);
+}
+
+.boot-arrow {
+    font-size: 1.5rem;
+    color: var(--primary);
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Код */
+.code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+}
+
+.code-block.small {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+}
+
+.code-block pre {
+    margin: 0;
+}
+
+.code-block code {
+    color: var(--primary);
+}
+
+/* Заметки */
+.note {
+    background: rgba(0, 255, 136, 0.1);
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.note.small {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.note h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Подвал */
+footer {
+    background: rgba(5, 6, 7, 0.9);
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    margin-top: 3rem;
+    text-align: center;
+    color: #666;
+}
+
+.footer-subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1200px) {
+    .type-pros-cons {
+        grid-template-columns: 1fr;
+    }
+
+    .memory-features {
+        grid-template-columns: 1fr;
+    }
+
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr;
+    }
+
+    .full-boot-sequence {
+        flex-direction: column;
+    }
+
+    .boot-arrow {
+        transform: rotate(90deg);
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    nav ul {
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ядро ОС · Архитектура и загрузка</title>
+  <link rel="stylesheet" href="Core.css">
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-content">
+      <span class="logo">🧠 Ядро ОС · Архитектура и загрузка</span>
+      <nav>
+        <ul>
+          <li><a href="#intro">Введение</a></li>
+          <li><a href="#types">Типы ядер</a></li>
+          <li><a href="#init">Инициализация</a></li>
+          <li><a href="#subsystems">Подсистемы</a></li>
+          <li><a href="#windows">Windows NT</a></li>
+          <li><a href="#linux">Linux</a></li>
+          <li><a href="#comparison">Сравнение</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Ядро операционной системы</h1>
+
+  <section id="intro" class="card">
+    <p class="intro-text">
+      <strong>Ядро ОС (Kernel)</strong> — это центральный компонент операционной системы, который управляет
+      аппаратными ресурсами компьютера и предоставляет сервисы для прикладных программ. После передачи
+      управления от загрузчика (<code>winload.efi</code>, <code>vmlinuz</code>) ядро проходит этап
+      инициализации, после которого система становится полностью функциональной.
+    </p>
+
+    <div class="kernel-badge">
+      <span class="badge windows">Windows NT</span>
+      <span class="badge linux">Linux</span>
+      <span class="badge macos">XNU (macOS)</span>
+    </div>
+
+    <h3 style="margin-top: 1.5rem;">Основные функции ядра</h3>
+    <ul class="kernel-functions">
+      <li><strong>Управление процессами</strong> — создание, планирование, синхронизация потоков выполнения</li>
+      <li><strong>Управление памятью</strong> — виртуальная память, страничная организация, защита памяти</li>
+      <li><strong>Управление устройствами</strong> — драйверы, обработка прерываний, DMA</li>
+      <li><strong>Файловые системы</strong> — абстракция хранения данных, кэширование операций ввода-вывода</li>
+      <li><strong>Сетевые сервисы</strong> — стек протоколов, сокеты, маршрутизация</li>
+      <li><strong>Безопасность</strong> — управление правами доступа, изоляция процессов</li>
+    </ul>
+  </section>
+
+  <section id="types">
+    <h2>🧩 Типы архитектуры ядра</h2>
+
+    <div class="kernel-types-grid">
+      <div class="kernel-type-card">
+        <div class="type-icon">🔷</div>
+        <h3>Монолитное ядро</h3>
+        <p>Все компоненты работают в одном адресном пространстве с правами ядра.</p>
+
+        <div class="type-pros-cons">
+          <div class="pros">
+            <h4>✅ Преимущества</h4>
+            <ul>
+              <li>Высокая производительность (нет переключений контекста)</li>
+              <li>Простая коммуникация между подсистемами</li>
+              <li>Меньшие накладные расходы</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Недостатки</h4>
+            <ul>
+              <li>Низкая отказоустойчивость (падение одного модуля — крах всей системы)</li>
+              <li>Сложность отладки и модификации</li>
+              <li>Большой объём кода в привилегированном режиме</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="example-badge">Примеры: Linux, FreeBSD, старые версии Windows</div>
+      </div>
+
+      <div class="kernel-type-card">
+        <div class="type-icon">🔶</div>
+        <h3>Микроядро</h3>
+        <p>Минимальный набор функций в ядре; остальные сервисы работают в пользовательском пространстве.</p>
+
+        <div class="type-pros-cons">
+          <div class="pros">
+            <h4>✅ Преимущества</h4>
+            <ul>
+              <li>Высокая отказоустойчивость (падение сервиса не влияет на ядро)</li>
+              <li>Лёгкость модификации и расширения</li>
+              <li>Меньшая поверхность атаки</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Недостатки</h4>
+            <ul>
+              <li>Сниженная производительность (частые переключения контекста)</li>
+              <li>Сложная коммуникация между компонентами</li>
+              <li>Высокие накладные расходы на межпроцессное взаимодействие</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="example-badge">Примеры: MINIX, QNX, L4, seL4</div>
+      </div>
+
+      <div class="kernel-type-card">
+        <div class="type-icon">🔷🔶</div>
+        <h3>Гибридное ядро</h3>
+        <p>Комбинация подходов: критические компоненты в ядре, остальные — как модули или сервисы.</p>
+
+        <div class="type-pros-cons">
+          <div class="pros">
+            <h4>✅ Преимущества</h4>
+            <ul>
+              <li>Баланс между производительностью и отказоустойчивостью</li>
+              <li>Гибкость архитектуры</li>
+              <li>Возможность динамической загрузки модулей</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Недостатки</h4>
+            <ul>
+              <li>Сложность проектирования</li>
+              <li>Неоднозначная граница между ядром и пользовательским пространством</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="example-badge">Примеры: Windows NT, XNU (macOS/iOS), современный Linux (с модулями)</div>
+      </div>
+    </div>
+
+    <div class="kernel-diagram">
+      <div class="diagram-row">
+        <div class="diagram-cell monolithic">
+          <div class="diagram-label">Монолитное ядро</div>
+          <div class="diagram-layer kernel-layer">Ядро (процессы, память, драйверы, файловые системы)</div>
+          <div class="diagram-layer hardware-layer">Аппаратное обеспечение</div>
+        </div>
+
+        <div class="diagram-cell microkernel">
+          <div class="diagram-label">Микроядро</div>
+          <div class="diagram-layer kernel-layer">Ядро (только планировщик + IPC)</div>
+          <div class="diagram-layer service-layer">Сервисы (драйверы, файловые системы)</div>
+          <div class="diagram-layer hardware-layer">Аппаратное обеспечение</div>
+        </div>
+
+        <div class="diagram-cell hybrid">
+          <div class="diagram-label">Гибридное ядро</div>
+          <div class="diagram-layer kernel-layer">Ядро (планировщик, память, драйверы)</div>
+          <div class="diagram-layer module-layer">Модули (файловые системы, сетевые стеки)</div>
+          <div class="diagram-layer hardware-layer">Аппаратное обеспечение</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="init">
+    <h2>⚙️ Инициализация ядра</h2>
+
+    <div class="card">
+      <h3>Этапы загрузки ядра</h3>
+
+      <div class="kernel-init-stages">
+        <div class="init-stage active">
+          <div class="stage-number">1</div>
+          <h4>Точка входа</h4>
+          <p>Загрузчик передаёт управление функции <code>KernelEntry()</code> (Windows) или <code>start_kernel()</code> (Linux)</p>
+        </div>
+
+        <div class="init-stage">
+          <div class="stage-number">2</div>
+          <h4>Базовая инициализация</h4>
+          <p>Настройка стека, сегментов памяти, таблиц прерываний (IDT), таблиц страниц (GDT/LDT)</p>
+        </div>
+
+        <div class="init-stage">
+          <div class="stage-number">3</div>
+          <h4>Инициализация памяти</h4>
+          <p>Обнаружение объёма ОЗУ, настройка страничной организации, включение виртуальной памяти</p>
+        </div>
+
+        <div class="init-stage">
+          <div class="stage-number">4</div>
+          <h4>Инициализация процессора</h4>
+          <p>Настройка мультипроцессорности (SMP), инициализация кэшей, включение режима защиты</p>
+        </div>
+
+        <div class="init-stage">
+          <div class="stage-number">5</div>
+          <h4>Загрузка драйверов</h4>
+          <p>Загрузка критических драйверов (дисковые контроллеры, клавиатура, видеокарта)</p>
+        </div>
+
+        <div class="init-stage">
+          <div class="stage-number">6</div>
+          <h4>Монтирование корневой ФС</h4>
+          <p>Монтирование корневого раздела (<code>/</code> для Linux, <code>C:\</code> для Windows)</p>
+        </div>
+
+        <div class="init-stage">
+          <div class="stage-number">7</div>
+          <h4>Запуск первого процесса</h4>
+          <p>Создание процесса <code>init</code> (PID 1) в Linux или <code>smss.exe</code> в Windows</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Структура памяти после загрузки ядра</h3>
+      <div class="memory-map">
+        <div class="memory-region">
+          <span class="region-range">0x00000000 - 0x0009FFFF</span>
+          <span class="region-type">Низкая память</span>
+          <span class="region-desc">BIOS, таблицы прерываний (устаревшее)</span>
+        </div>
+        <div class="memory-region kernel">
+          <span class="region-range">0xC0000000 - 0xFFFFFFFF</span>
+          <span class="region-type">Пространство ядра (32-бит)</span>
+          <span class="region-desc">Код и данные ядра, драйверы</span>
+        </div>
+        <div class="memory-region user">
+          <span class="region-range">0x00100000 - 0xBFFFFFFF</span>
+          <span class="region-type">Пользовательское пространство</span>
+          <span class="region-desc">Процессы приложений</span>
+        </div>
+        <div class="memory-region kernel-64">
+          <span class="region-range">0xFFFF800000000000 - 0xFFFFFFFFFFFFFFFF</span>
+          <span class="region-type">Пространство ядра (64-бит)</span>
+          <span class="region-desc">Ядро и драйверы в 64-битных системах</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <h4>💡 Почему ядро в верхней части памяти?</h4>
+        <p>
+          В 32-битных системах ядро размещается в верхней части адресного пространства (обычно выше 3 ГБ),
+          чтобы оставить максимум памяти для пользовательских процессов. При переключении контекста
+          таблицы страниц обновляются так, чтобы каждое приложение «видело» своё пространство, а ядро
+          оставалось доступным через защищённые страницы.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="subsystems">
+    <h2>🔧 Подсистемы ядра</h2>
+
+    <div class="subsystems-grid">
+      <div class="subsystem-card">
+        <h3>Планировщик (Scheduler)</h3>
+        <p>Отвечает за распределение времени процессора между процессами и потоками.</p>
+
+        <div class="scheduler-types">
+          <div class="scheduler-type">
+            <h4>Round Robin</h4>
+            <p>Каждый процесс получает квант времени по очереди</p>
+          </div>
+          <div class="scheduler-type">
+            <h4>Приоритетный</h4>
+            <p>Процессы с высоким приоритетом получают больше времени</p>
+          </div>
+          <div class="scheduler-type">
+            <h4>Многоуровневая очередь</h4>
+            <p>Разные очереди для разных типов задач (интерактивные, фоновые)</p>
+          </div>
+        </div>
+
+        <div class="code-block small">
+                        <pre><code>// Linux CFS (Completely Fair Scheduler)
+// Алгоритм взвешенного распределения времени
+vruntime = время_выполнения / приоритет</code></pre>
+        </div>
+      </div>
+
+      <div class="subsystem-card">
+        <h3>Менеджер памяти (MMU)</h3>
+        <p>Управляет виртуальной памятью, страничной организацией и подкачкой на диск.</p>
+
+        <div class="memory-features">
+          <div class="feature-item">
+            <span class="feature-icon">📄</span>
+            <span class="feature-text">Страничная организация (4 КБ страницы)</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🔄</span>
+            <span class="feature-text">Подкачка (swap) при нехватке памяти</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🔒</span>
+            <span class="feature-text">NX-bit (No-eXecute) для защиты от буферных переполнений</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">⚡</span>
+            <span class="feature-text">TLB (Translation Lookaside Buffer) для кэширования преобразований</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsystem-card">
+        <h3>Драйверы устройств</h3>
+        <p>Программные интерфейсы для взаимодействия с аппаратным обеспечением.</p>
+
+        <div class="driver-layers">
+          <div class="driver-layer">
+            <span class="layer-number">1</span>
+            <span class="layer-name">Hardware Abstraction Layer (HAL)</span>
+          </div>
+          <div class="driver-layer">
+            <span class="layer-number">2</span>
+            <span class="layer-name">Bus Drivers (PCI, USB)</span>
+          </div>
+          <div class="driver-layer">
+            <span class="layer-number">3</span>
+            <span class="layer-name">Function Drivers (драйверы устройств)</span>
+          </div>
+          <div class="driver-layer">
+            <span class="layer-number">4</span>
+            <span class="layer-name">Filter Drivers (фильтрация запросов)</span>
+          </div>
+        </div>
+
+        <div class="code-block small">
+                        <pre><code>// Windows Driver Model (WDM)
+IRP (I/O Request Packet) → драйвер → устройство
+// Linux Kernel Module
+insmod module.ko → загрузка в ядро</code></pre>
+        </div>
+      </div>
+
+      <div class="subsystem-card">
+        <h3>Файловые системы</h3>
+        <p>Абстракция хранения данных на носителях.</p>
+
+        <div class="fs-table">
+          <div class="fs-row">
+            <span class="fs-name">NTFS</span>
+            <span class="fs-desc">Windows (журналирование, права)</span>
+          </div>
+          <div class="fs-row">
+            <span class="fs-name">ext4</span>
+            <span class="fs-desc">Linux (журналирование, быстрый доступ)</span>
+          </div>
+          <div class="fs-row">
+            <span class="fs-name">APFS</span>
+            <span class="fs-desc">macOS/iOS (оптимизация под SSD)</span>
+          </div>
+          <div class="fs-row">
+            <span class="fs-name">ZFS</span>
+            <span class="fs-desc">Солнечная система (целостность данных)</span>
+          </div>
+        </div>
+
+        <div class="note small">
+          Ядро предоставляет виртуальную файловую систему (VFS), которая абстрагирует различия между ФС
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="windows">
+    <h2>🪟 Архитектура ядра Windows NT</h2>
+
+    <div class="card">
+      <div class="windows-architecture">
+        <div class="arch-layer user-mode">
+          <h4>Пользовательский режим</h4>
+          <div class="arch-component">Приложения (exe/dll)</div>
+          <div class="arch-component">Подсистемы (Win32, POSIX)</div>
+          <div class="arch-component">Environment Subsystems</div>
+        </div>
+
+        <div class="arch-layer boundary">
+          <span>Граница режимов (переключение через системные вызовы)</span>
+        </div>
+
+        <div class="arch-layer kernel-mode">
+          <h4>Режим ядра</h4>
+          <div class="arch-component executive">Executive (менеджеры ресурсов)</div>
+          <div class="arch-component kernel">Microkernel (планировщик, синхронизация)</div>
+          <div class="arch-component hal">HAL (Hardware Abstraction Layer)</div>
+          <div class="arch-component drivers">Драйверы устройств</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Executive Services (Windows)</h3>
+      <div class="executive-services">
+        <div class="service-item">
+          <span class="service-name">I/O Manager</span>
+          <span class="service-desc">Управление операциями ввода-вывода</span>
+        </div>
+        <div class="service-item">
+          <span class="service-name">Memory Manager</span>
+          <span class="service-desc">Виртуальная память, подкачка</span>
+        </div>
+        <div class="service-item">
+          <span class="service-name">Process Manager</span>
+          <span class="service-desc">Создание и управление процессами</span>
+        </div>
+        <div class="service-item">
+          <span class="service-name">Security Reference Monitor</span>
+          <span class="service-desc">Проверка прав доступа</span>
+        </div>
+        <div class="service-item">
+          <span class="service-name">Plug and Play Manager</span>
+          <span class="service-desc">Обнаружение и настройка устройств</span>
+        </div>
+        <div class="service-item">
+          <span class="service-name">Power Manager</span>
+          <span class="service-desc">Управление энергопотреблением</span>
+        </div>
+      </div>
+
+      <div class="code-block">
+                    <pre><code>// Системный вызов в Windows
+// Пользовательский режим → переход в ядро через syscall/sysenter
+NtReadFile() → I/O Manager → File System Driver → Дисковый драйвер
+
+// Загрузка драйвера
+sc create MyDriver binPath= C:\drivers\my.sys type= kernel
+sc start MyDriver</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="linux">
+    <h2>🐧 Архитектура ядра Linux</h2>
+
+    <div class="card">
+      <div class="linux-architecture">
+        <div class="arch-layer user-space">
+          <h4>Пользовательское пространство</h4>
+          <div class="arch-component">Приложения (C, Python, Java)</div>
+          <div class="arch-component">Библиотеки (glibc, libc)</div>
+          <div class="arch-component">Системные утилиты (systemd, bash)</div>
+        </div>
+
+        <div class="arch-layer boundary">
+          <span>Системные вызовы (syscall)</span>
+        </div>
+
+        <div class="arch-layer kernel-space">
+          <h4>Пространство ядра</h4>
+          <div class="arch-component scheduler">Планировщик процессов</div>
+          <div class="arch-component mmu">Менеджер памяти</div>
+          <div class="arch-component vfs">VFS + файловые системы</div>
+          <div class="arch-component net">Сетевой стек</div>
+          <div class="arch-component drivers">Драйверы устройств</div>
+          <div class="arch-component arch">Архитектурно-зависимый код</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Структура исходного кода ядра Linux</h3>
+      <div class="kernel-source-tree">
+        <div class="source-item">
+          <span class="source-path">arch/</span>
+          <span class="source-desc">Архитектурно-зависимый код (x86, arm, riscv)</span>
+        </div>
+        <div class="source-item">
+          <span class="source-path">kernel/</span>
+          <span class="source-desc">Планировщик, системные вызовы, синхронизация</span>
+        </div>
+        <div class="source-item">
+          <span class="source-path">mm/</span>
+          <span class="source-desc">Управление памятью (страницы, зоны, подкачка)</span>
+        </div>
+        <div class="source-item">
+          <span class="source-path">fs/</span>
+          <span class="source-desc">Файловые системы (ext4, btrfs, nfs)</span>
+        </div>
+        <div class="source-item">
+          <span class="source-path">net/</span>
+          <span class="source-desc">Сетевой стек (TCP/IP, сокеты)</span>
+        </div>
+        <div class="source-item">
+          <span class="source-path">drivers/</span>
+          <span class="source-desc">Драйверы устройств (блок, сетевые, графические)</span>
+        </div>
+      </div>
+
+      <div class="code-block">
+                    <pre><code>// Системный вызов в Linux
+// Пользовательский режим → прерывание 0x80 или syscall
+read(fd, buf, count) → syscall → sys_read() → vfs_read() → ext4_read()
+
+// Загрузка модуля ядра
+sudo insmod my_module.ko
+sudo rmmod my_module
+lsmod | grep my_module</code></pre>
+      </div>
+
+      <div class="note">
+        <h4>💡 Монолитное ядро с модулями</h4>
+        <p>
+          Linux технически является монолитным ядром, но поддерживает динамическую загрузку модулей (<code>.ko</code>),
+          что даёт гибкость микроядра без потери производительности. Модули загружаются в пространство ядра и
+          имеют полный доступ к его интерфейсам.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="comparison">
+    <h2>📊 Сравнение ядер операционных систем</h2>
+
+    <div class="comparison-table">
+      <div class="table-header">
+        <div class="table-cell">Параметр</div>
+        <div class="table-cell">Windows NT</div>
+        <div class="table-cell">Linux</div>
+        <div class="table-cell">XNU (macOS)</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Тип архитектуры</div>
+        <div class="table-cell">Гибридное</div>
+        <div class="table-cell">Монолитное + модули</div>
+        <div class="table-cell">Гибридное (микроядро Mach + BSD)</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Лицензия</div>
+        <div class="table-cell">Проприетарная</div>
+        <div class="table-cell">GPL v2</div>
+        <div class="table-cell">Открытая (APSL)</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Модель драйверов</div>
+        <div class="table-cell">WDM / WDF</div>
+        <div class="table-cell">LKM (Loadable Kernel Modules)</div>
+        <div class="table-cell">I/O Kit (C++ фреймворк)</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Планировщик</div>
+        <div class="table-cell">Приоритетный с вытеснением</div>
+        <div class="table-cell">CFS (Completely Fair Scheduler)</div>
+        <div class="table-cell">Многопоточный приоритетный</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Поддержка мультипроцессорности</div>
+        <div class="table-cell">SMP, NUMA</div>
+        <div class="table-cell">SMP, NUMA, big.LITTLE</div>
+        <div class="table-cell">SMP, оптимизация под Apple Silicon</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Безопасность</div>
+        <div class="table-cell">Mandatory Integrity Control, HVCI</div>
+        <div class="table-cell">SELinux, AppArmor, Seccomp</div>
+        <div class="table-cell">SIP (System Integrity Protection)</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Загрузка модулей</div>
+        <div class="table-cell">Только подписанные (Secure Boot)</div>
+        <div class="table-cell">Любые (но могут быть ограничены)</div>
+        <div class="table-cell">Только подписанные Apple</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Отладка ядра</div>
+        <div class="table-cell">WinDbg, KD</div>
+        <div class="table-cell">KGDB, ftrace, eBPF</div>
+        <div class="table-cell">lldb, DTrace</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 2rem;">
+      <h3>Этапы загрузки — полный цикл</h3>
+      <div class="full-boot-sequence">
+        <div class="boot-stage">
+          <span class="stage-num">1</span>
+          <span class="stage-name">Boot ROM</span>
+          <span class="stage-desc">Инициализация процессора, поиск кода загрузки</span>
+        </div>
+        <div class="boot-arrow">→</div>
+        <div class="boot-stage">
+          <span class="stage-num">2</span>
+          <span class="stage-name">UEFI Firmware</span>
+          <span class="stage-desc">Инициализация устройств, загрузка прошивки</span>
+        </div>
+        <div class="boot-arrow">→</div>
+        <div class="boot-stage">
+          <span class="stage-num">3</span>
+          <span class="stage-name">Boot Manager</span>
+          <span class="stage-desc">Выбор ОС, проверка подписи (Secure Boot)</span>
+        </div>
+        <div class="boot-arrow">→</div>
+        <div class="boot-stage">
+          <span class="stage-num">4</span>
+          <span class="stage-name">Boot Loader</span>
+          <span class="stage-desc">Загрузка ядра в память</span>
+        </div>
+        <div class="boot-arrow">→</div>
+        <div class="boot-stage kernel-stage">
+          <span class="stage-num">5</span>
+          <span class="stage-name">Ядро ОС</span>
+          <span class="stage-desc">Инициализация подсистем, запуск первого процесса</span>
+        </div>
+        <div class="boot-arrow">→</div>
+        <div class="boot-stage">
+          <span class="stage-num">6</span>
+          <span class="stage-name">Пользовательское пространство</span>
+          <span class="stage-desc">systemd / init, графическая оболочка</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>Ядро операционной системы · Архитектура и загрузка</p>
+    <p class="footer-subtitle">Финальный этап загрузки — от передачи управления до готовой системы</p>
+  </div>
+</footer>
+
+<script src="Core.js"></script>
+</body>
+</html>

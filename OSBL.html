@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OS Boot Loader · Загрузка ядра</title>
+  <link rel="stylesheet" href="OSBL.css">
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-content">
+      <span class="logo">🚀 OS Boot Loader · Загрузка ядра</span>
+      <nav>
+        <ul>
+          <li><a href="#intro">Введение</a></li>
+          <li><a href="#windows">Windows Boot Manager</a></li>
+          <li><a href="#grub">GRUB (Linux)</a></li>
+          <li><a href="#process">Процесс загрузки</a></li>
+          <li><a href="#config">Конфигурация</a></li>
+          <li><a href="#recovery">Восстановление</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <h1>OS Boot Loader: Загрузка операционной системы</h1>
+
+  <section id="intro" class="card">
+    <p class="intro-text">
+      <strong>OS Boot Loader</strong> — это программа, которая запускается после передачи управления от
+      <strong>UEFI Boot Manager</strong> и отвечает за загрузку ядра операционной системы в память.
+      В отличие от прошивки UEFI, загрузчик ОС является частью самой операционной системы и знает,
+      как работать с её файловой системой, драйверами и конфигурацией.
+    </p>
+
+    <div class="comparison-badge">
+      <span class="badge windows">Windows Boot Manager</span>
+      <span class="badge linux">GRUB / systemd-boot</span>
+      <span class="badge macos">Boot Camp / rEFInd</span>
+    </div>
+
+    <h3 style="margin-top: 1.5rem;">Основные задачи загрузчика</h3>
+    <ul class="tasks-list">
+      <li><strong>Поиск ядра ОС</strong> — находит файлы ядра в файловой системе</li>
+      <li><strong>Загрузка ядра в память</strong> — копирует ядро из диска в оперативную память</li>
+      <li><strong>Передача параметров</strong> — передаёт ядру аргументы командной строки</li>
+      <li><strong>Переключение режимов</strong> — переводит процессор из режима загрузки в режим ОС</li>
+      <li><strong>Передача управления</strong> — передаёт контроль точке входа ядра</li>
+    </ul>
+  </section>
+
+  <section id="windows">
+    <h2>🪟 Windows Boot Manager</h2>
+
+    <div class="card">
+      <h3>Структура загрузчика Windows</h3>
+      <p>Windows использует двухэтапный загрузчик, состоящий из:</p>
+
+      <div class="windows-boot-flow">
+        <div class="boot-component">
+          <div class="component-icon">💾</div>
+          <h4>bootmgfw.efi</h4>
+          <p>Основной загрузчик UEFI (находится в <code>/EFI/Microsoft/Boot/</code>)</p>
+        </div>
+
+        <div class="boot-arrow">→</div>
+
+        <div class="boot-component">
+          <div class="component-icon">📖</div>
+          <h4>BCD (Boot Configuration Data)</h4>
+          <p>База данных конфигурации загрузки (файл <code>/EFI/Microsoft/Boot/BCD</code>)</p>
+        </div>
+
+        <div class="boot-arrow">→</div>
+
+        <div class="boot-component">
+          <div class="component-icon">⚙️</div>
+          <h4>winload.efi</h4>
+          <p>Загрузчик ядра Windows (находится в <code>/Windows/System32/</code>)</p>
+        </div>
+
+        <div class="boot-arrow">→</div>
+
+        <div class="boot-component">
+          <div class="component-icon">🚀</div>
+          <h4>ntoskrnl.exe</h4>
+          <p>Ядро операционной системы Windows</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Файл конфигурации BCD</h3>
+      <p>BCD (Boot Configuration Data) — это база данных в формате реестра, которая хранит всю информацию о загрузке:</p>
+
+      <div class="bcd-structure">
+        <div class="bcd-entry">
+          <span class="entry-name">identifier</span>
+          <span class="entry-value">{bootmgr}</span>
+          <span class="entry-desc">Главный загрузчик</span>
+        </div>
+        <div class="bcd-entry">
+          <span class="entry-name">timeout</span>
+          <span class="entry-value">30</span>
+          <span class="entry-desc">Таймаут меню (секунды)</span>
+        </div>
+        <div class="bcd-entry">
+          <span class="entry-name">device</span>
+          <span class="entry-value">partition=C:</span>
+          <span class="entry-desc">Раздел с ядром</span>
+        </div>
+        <div class="bcd-entry">
+          <span class="entry-name">path</span>
+          <span class="entry-value">\Windows\System32\winload.efi</span>
+          <span class="entry-desc">Путь к загрузчику ядра</span>
+        </div>
+        <div class="bcd-entry">
+          <span class="entry-name">osdevice</span>
+          <span class="entry-value">partition=C:</span>
+          <span class="entry-desc">Раздел с ОС</span>
+        </div>
+        <div class="bcd-entry">
+          <span class="entry-name">systemroot</span>
+          <span class="entry-value">\Windows</span>
+          <span class="entry-desc">Корневая папка ОС</span>
+        </div>
+        <div class="bcd-entry">
+          <span class="entry-name">detecthal</span>
+          <span class="entry-value">Yes</span>
+          <span class="entry-desc">Автоматическое определение HAL</span>
+        </div>
+        <div class="bcd-entry">
+          <span class="entry-name">nx</span>
+          <span class="entry-value">OptIn</span>
+          <span class="entry-desc">DEP (Data Execution Prevention)</span>
+        </div>
+      </div>
+
+      <div class="code-block">
+                    <pre><code># Просмотр конфигурации BCD
+bcdedit /enum all
+
+# Изменение таймаута
+bcdedit /set {bootmgr} timeout 5
+
+# Добавление параметров ядра
+bcdedit /set {default} nx AlwaysOn
+bcdedit /set {default} safeboot Minimal
+
+# Включение режима отладки
+bcdedit /set {default} debug on
+bcdedit /set {default} nointegritychecks on</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="grub">
+    <h2>🐧 GRUB (GRand Unified Bootloader)</h2>
+
+    <div class="card">
+      <h3>Структура загрузчика GRUB</h3>
+      <p>GRUB — самый популярный загрузчик для Linux. Использует модульную архитектуру:</p>
+
+      <div class="grub-structure">
+        <div class="grub-stage">
+          <div class="stage-number">1</div>
+          <h4>Stage 1 (boot.img)</h4>
+          <p>Первые 446 байт — загружается из MBR или раздела загрузки</p>
+        </div>
+
+        <div class="stage-arrow">→</div>
+
+        <div class="grub-stage">
+          <div class="stage-number">1.5</div>
+          <h4>Stage 1.5 (core.img)</h4>
+          <p>Загружает драйверы файловой системы</p>
+        </div>
+
+        <div class="stage-arrow">→</div>
+
+        <div class="grub-stage">
+          <div class="stage-number">2</div>
+          <h4>Stage 2 (grub.cfg)</h4>
+          <p>Основная конфигурация и меню выбора ОС</p>
+        </div>
+
+        <div class="stage-arrow">→</div>
+
+        <div class="grub-stage">
+          <div class="stage-number">✓</div>
+          <h4>Ядро Linux (vmlinuz)</h4>
+          <p>Загрузка ядра и initramfs</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Конфигурация GRUB</h3>
+      <p>Основной файл конфигурации: <code>/boot/grub/grub.cfg</code> (генерируется автоматически)</p>
+
+      <div class="grub-config">
+        <div class="config-section">
+          <h4>Настройки (<code>/etc/default/grub</code>)</h4>
+          <div class="config-item">
+            <span class="config-key">GRUB_DEFAULT</span>
+            <span class="config-value">0</span>
+            <span class="config-comment"># Загрузка первой записи по умолчанию</span>
+          </div>
+          <div class="config-item">
+            <span class="config-key">GRUB_TIMEOUT</span>
+            <span class="config-value">5</span>
+            <span class="config-comment"># Таймаут меню (секунды)</span>
+          </div>
+          <div class="config-item">
+            <span class="config-key">GRUB_CMDLINE_LINUX</span>
+            <span class="config-value">"quiet splash"</span>
+            <span class="config-comment"># Параметры ядра</span>
+          </div>
+          <div class="config-item">
+            <span class="config-key">GRUB_DISABLE_RECOVERY</span>
+            <span class="config-value">true</span>
+            <span class="config-comment"># Отключить режим восстановления</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+                    <pre><code># Генерация конфигурации
+sudo update-grub
+
+# Установка GRUB на диск
+sudo grub-install /dev/sda
+
+# Ручное редактирование (не рекомендуется)
+sudo nano /boot/grub/grub.cfg
+
+# Добавление кастомной записи
+sudo nano /etc/grub.d/40_custom
+# Затем: sudo update-grub</code></pre>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Структура записи меню GRUB</h3>
+      <div class="grub-menu-entry">
+        <div class="menu-line">
+          <span class="line-number">1</span>
+          <span class="line-content">menuentry "Ubuntu 22.04 LTS" {</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">2</span>
+          <span class="line-content">recordfail</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">3</span>
+          <span class="line-content">load_video</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">4</span>
+          <span class="line-content">gfxmode $linux_gfx_mode</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">5</span>
+          <span class="line-content">insmod gzio</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">6</span>
+          <span class="line-content">insmod part_gpt</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">7</span>
+          <span class="line-content">insmod ext2</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">8</span>
+          <span class="line-content">set root='hd0,gpt2'</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">9</span>
+          <span class="line-content">linux /boot/vmlinuz-5.15.0-86-generic root=UUID=xxxx ro quiet splash $vt_handoff</span>
+        </div>
+        <div class="menu-line indent">
+          <span class="line-number">10</span>
+          <span class="line-content">initrd /boot/initrd.img-5.15.0-86-generic</span>
+        </div>
+        <div class="menu-line">
+          <span class="line-number">11</span>
+          <span class="line-content">}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process">
+    <h2>⚙️ Процесс загрузки ядра</h2>
+
+    <div class="card">
+      <h3>Этапы загрузки ядра ОС</h3>
+
+      <div class="kernel-load-stages">
+        <div class="kernel-stage active">
+          <div class="stage-icon">1️⃣</div>
+          <h4>Загрузка загрузчика</h4>
+          <p>UEFI Boot Manager находит и запускает <code>bootmgfw.efi</code> или <code>grubx64.efi</code></p>
+        </div>
+
+        <div class="kernel-stage">
+          <div class="stage-icon">2️⃣</div>
+          <h4>Чтение конфигурации</h4>
+          <p>Загрузчик читает файл конфигурации (BCD или <code>grub.cfg</code>)</p>
+        </div>
+
+        <div class="kernel-stage">
+          <div class="stage-icon">3️⃣</div>
+          <h4>Поиск ядра</h4>
+          <p>Загрузчик находит файлы ядра в файловой системе (<code>ntoskrnl.exe</code> или <code>vmlinuz</code>)</p>
+        </div>
+
+        <div class="kernel-stage">
+          <div class="stage-icon">4️⃣</div>
+          <h4>Загрузка в память</h4>
+          <p>Ядро копируется из диска в оперативную память (обычно в область <code>0x100000</code>)</p>
+        </div>
+
+        <div class="kernel-stage">
+          <div class="stage-icon">5️⃣</div>
+          <h4>Загрузка initramfs/initrd</h4>
+          <p>(Linux) Загружается временная файловая система для монтирования корневого раздела</p>
+        </div>
+
+        <div class="kernel-stage">
+          <div class="stage-icon">6️⃣</div>
+          <h4>Переключение режимов</h4>
+          <p>Процессор переключается из режима загрузки (Long Mode) в режим ядра</p>
+        </div>
+
+        <div class="kernel-stage">
+          <div class="stage-icon">7️⃣</div>
+          <h4>Передача управления</h4>
+          <p>Контроль передаётся точке входа ядра (<code>KernelEntry()</code>)</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Структура памяти при загрузке</h3>
+      <div class="memory-layout">
+        <div class="memory-region">
+          <span class="region-name">0x00000000 - 0x0009FFFF</span>
+          <span class="region-desc">Низкая память (конвенциональная)</span>
+        </div>
+        <div class="memory-region kernel-region">
+          <span class="region-name">0x00100000 - 0x00FFFFFF</span>
+          <span class="region-desc">Ядро ОС (1 МБ - 16 МБ)</span>
+        </div>
+        <div class="memory-region">
+          <span class="region-name">0x01000000 - 0x7FFFFFFF</span>
+          <span class="region-desc">Оперативная память (ядра и пользовательские процессы)</span>
+        </div>
+        <div class="memory-region">
+          <span class="region-name">0x80000000 - 0xFFFFFFFF</span>
+          <span class="region-desc">Высокая память (для 32-битных систем)</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <h4>💡 initramfs vs initrd</h4>
+        <p>
+          <strong>initrd</strong> (initial RAM disk) — устаревший формат временной файловой системы для Linux.
+          <strong>initramfs</strong> (initial RAM filesystem) — современный формат, использующий cpio-архив.
+          Оба загружаются в память перед ядром и содержат драйверы для монтирования корневого раздела.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="config">
+    <h2>🔧 Конфигурация загрузчика</h2>
+
+    <div class="config-grid">
+      <div class="config-card">
+        <h3>Windows: bcdedit</h3>
+
+        <div class="code-block">
+                        <pre><code># Просмотр всех записей
+bcdedit /enum firmware
+bcdedit /enum all
+
+# Изменение параметров
+bcdedit /set {default} timeout 10
+bcdedit /set {default} nx AlwaysOn
+bcdedit /set {default} pciexpress native
+
+# Добавление записи для двойной загрузки
+bcdedit /create /d "Linux" /application bootsector
+bcdedit /set {GUID} device partition=C:
+bcdedit /set {GUID} path \linux.bin
+bcdedit /displayorder {GUID} /addlast
+
+# Включение безопасного режима
+bcdedit /set {default} safeboot Minimal
+
+# Отключение проверки подписи драйверов
+bcdedit /set {default} testsigning on
+bcdedit /set {default} nointegritychecks on</code></pre>
+        </div>
+      </div>
+
+      <div class="config-card">
+        <h3>Linux: GRUB</h3>
+
+        <div class="code-block">
+                        <pre><code># Основные настройки
+sudo nano /etc/default/grub
+
+# Пример конфигурации:
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=5
+GRUB_CMDLINE_LINUX="quiet splash"
+GRUB_DISABLE_RECOVERY=true
+
+# Генерация конфигурации
+sudo update-grub
+
+# Добавление кастомной записи
+sudo nano /etc/grub.d/40_custom
+menuentry "Custom OS" {
+    set root=(hd0,1)
+    linux /boot/vmlinuz root=/dev/sda1
+    initrd /boot/initrd.img
+}
+sudo update-grub
+
+# Установка на другой диск
+sudo grub-install /dev/sdb
+
+# Восстановление после сбоя
+sudo grub-install --recheck /dev/sda
+sudo update-grub</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Параметры ядра (Kernel Parameters)</h3>
+
+      <h4>Windows (<code>boot.ini</code> стиль)</h4>
+      <div class="kernel-params">
+        <div class="param-item">
+          <span class="param-name">/SAFEBOOT</span>
+          <span class="param-value">MINIMAL</span>
+          <span class="param-desc">Безопасный режим с минимальным набором драйверов</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">/DEBUG</span>
+          <span class="param-value">ON</span>
+          <span class="param-desc">Включение отладки ядра</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">/NOGUIBOOT</span>
+          <span class="param-value"></span>
+          <span class="param-desc">Отключение анимации загрузки</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">/MAXMEM</span>
+          <span class="param-value">4096</span>
+          <span class="param-desc">Ограничение памяти 4 ГБ</span>
+        </div>
+      </div>
+
+      <h4 style="margin-top: 1.5rem;">Linux (<code>GRUB_CMDLINE_LINUX</code>)</h4>
+      <div class="kernel-params">
+        <div class="param-item">
+          <span class="param-name">quiet</span>
+          <span class="param-value"></span>
+          <span class="param-desc">Минимальный вывод при загрузке</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">splash</span>
+          <span class="param-value"></span>
+          <span class="param-desc">Загрузочный экран (Plymouth)</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">nomodeset</span>
+          <span class="param-value"></span>
+          <span class="param-desc">Отключение KMS (для проблем с видеокартой)</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">single</span>
+          <span class="param-value"></span>
+          <span class="param-desc">Режим одного пользователя (безопасный режим)</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">init=/bin/bash</span>
+          <span class="param-value"></span>
+          <span class="param-desc">Запуск bash вместо init (для восстановления)</span>
+        </div>
+        <div class="param-item">
+          <span class="param-name">mem=4G</span>
+          <span class="param-value"></span>
+          <span class="param-desc">Ограничение памяти 4 ГБ</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="recovery">
+    <h2>🔧 Восстановление загрузчика</h2>
+
+    <div class="card">
+      <h3>Восстановление Windows Boot Manager</h3>
+
+      <div class="recovery-steps">
+        <div class="recovery-step">
+          <div class="step-icon">1</div>
+          <h4>Загрузка с установочного носителя</h4>
+          <p>Вставьте установочный диск/флешку и загрузитесь с него</p>
+        </div>
+
+        <div class="recovery-step">
+          <div class="step-icon">2</div>
+          <h4>Вход в командную строку восстановления</h4>
+          <p>Выберите «Восстановление системы» → «Командная строка»</p>
+        </div>
+
+        <div class="recovery-step">
+          <div class="step-icon">3</div>
+          <h4>Восстановление загрузчика</h4>
+          <div class="code-block small">
+                            <pre><code>bootrec /fixmbr
+bootrec /fixboot
+bootrec /scanos
+bootrec /rebuildbcd
+
+# Альтернатива (для UEFI):
+bcdboot C:\Windows /s S: /f UEFI
+# где C: — раздел с Windows, S: — EFI-раздел</code></pre>
+          </div>
+        </div>
+
+        <div class="recovery-step">
+          <div class="step-icon">4</div>
+          <h4>Перезагрузка</h4>
+          <p>Извлеките установочный носитель и перезагрузите систему</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 2rem;">Восстановление GRUB (Linux)</h3>
+
+      <div class="recovery-steps">
+        <div class="recovery-step">
+          <div class="step-icon">1</div>
+          <h4>Загрузка с LiveCD/LiveUSB</h4>
+          <p>Загрузитесь с установочного носителя Linux</p>
+        </div>
+
+        <div class="recovery-step">
+          <div class="step-icon">2</div>
+          <h4>Монтирование разделов</h4>
+          <div class="code-block small">
+                            <pre><code># Определение разделов
+sudo fdisk -l
+
+# Монтирование корневого раздела
+sudo mount /dev/sda2 /mnt
+
+# Монтирование загрузочного раздела (если отдельный)
+sudo mount /dev/sda1 /mnt/boot
+
+# Монтирование виртуальных файловых систем
+sudo mount --bind /dev /mnt/dev
+sudo mount --bind /proc /mnt/proc
+sudo mount --bind /sys /mnt/sys
+sudo mount --bind /run /mnt/run</code></pre>
+          </div>
+        </div>
+
+        <div class="recovery-step">
+          <div class="step-icon">3</div>
+          <h4>Chroot в установленную систему</h4>
+          <div class="code-block small">
+            <pre><code>sudo chroot /mnt /bin/bash</code></pre>
+          </div>
+        </div>
+
+        <div class="recovery-step">
+          <div class="step-icon">4</div>
+          <h4>Переустановка GRUB</h4>
+          <div class="code-block small">
+                            <pre><code># Для BIOS:
+grub-install /dev/sda
+update-grub
+
+# Для UEFI:
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu
+update-grub</code></pre>
+          </div>
+        </div>
+
+        <div class="recovery-step">
+          <div class="step-icon">5</div>
+          <h4>Выход и перезагрузка</h4>
+          <div class="code-block small">
+                            <pre><code>exit
+sudo umount /mnt/dev
+sudo umount /mnt/proc
+sudo umount /mnt/sys
+sudo umount /mnt/run
+sudo umount /mnt/boot
+sudo umount /mnt
+sudo reboot</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="warning">
+        <h4>⚠️ Распространённые ошибки</h4>
+        <ul>
+          <li><strong>GRUB rescue></strong> — повреждена конфигурация GRUB. Решение: переустановка через LiveCD</li>
+          <li><strong>Boot device not found</strong> — загрузчик не найден. Решение: проверка EFI-раздела</li>
+          <li><strong>Invalid signature</strong> — Secure Boot блокирует загрузку. Решение: отключение Secure Boot или подпись загрузчика</li>
+          <li><strong>Missing operating system</strong> — повреждён раздел с ОС. Решение: восстановление через установочный носитель</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>📊 Сравнение загрузчиков</h2>
+
+    <div class="comparison-table">
+      <div class="table-header">
+        <div class="table-cell">Параметр</div>
+        <div class="table-cell">Windows Boot Manager</div>
+        <div class="table-cell">GRUB 2</div>
+        <div class="table-cell">systemd-boot</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Тип</div>
+        <div class="table-cell">Закрытый</div>
+        <div class="table-cell">Открытый</div>
+        <div class="table-cell">Открытый</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Поддержка UEFI</div>
+        <div class="table-cell">✅ Полная</div>
+        <div class="table-cell">✅ Полная</div>
+        <div class="table-cell">✅ Только UEFI</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Поддержка BIOS</div>
+        <div class="table-cell">✅ (через CSM)</div>
+        <div class="table-cell">✅ Полная</div>
+        <div class="table-cell">❌ Нет</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Файловые системы</div>
+        <div class="table-cell">NTFS, FAT32</div>
+        <div class="table-cell">ext4, Btrfs, XFS, FAT32</div>
+        <div class="table-cell">FAT32 (EFI), любые (ОС)</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Конфигурация</div>
+        <div class="table-cell">BCD (бинарный)</div>
+        <div class="table-cell">grub.cfg (текстовый)</div>
+        <div class="table-cell">Конфиги в /boot/loader/</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Двойная загрузка</div>
+        <div class="table-cell">Сложно</div>
+        <div class="table-cell">✅ Отлично</div>
+        <div class="table-cell">✅ Хорошо</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Графический интерфейс</div>
+        <div class="table-cell">❌ Нет (только текст)</div>
+        <div class="table-cell">✅ Поддерживается</div>
+        <div class="table-cell">❌ Нет</div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell">Восстановление</div>
+        <div class="table-cell">bcdboot, bootrec</div>
+        <div class="table-cell">grub-install, update-grub</div>
+        <div class="table-cell">bootctl install</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>OS Boot Loader · Загрузка операционной системы</p>
+    <p class="footer-subtitle">От загрузчика до ядра — финальный этап загрузки</p>
+  </div>
+</footer>
+
+<script src="OSBL.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сценарии · Сравнение DAC и MAC</title>
+    <link rel="stylesheet" href="Practice.css">
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <span class="logo">🔐 OS Security · Практика</span>
+            <nav>
+                <ul>
+                    <li><a href="AccessСontrol.html">Теория</a></li>
+                    <li><a href="#scenario">Сценарии</a></li>
+                    <li><a href="#compare">Сравнение</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <h1>Сравнение моделей контроля доступа: DAC и MAC</h1>
+    <p class="note" id="intro-note">
+        Выберите сценарий атаки — увидите, как разные модели безопасности реагируют на угрозу
+    </p>
+
+    <!-- Сценарии -->
+    <section id="scenario">
+        <h2>Сценарии атак</h2>
+
+        <div class="card">
+            <div class="scenario-card" data-scenario="webShell">
+                <div class="scenario-title">🌐 Веб-шелл (www-data)</div>
+                <div class="scenario-desc">Хакер получил доступ к веб-серверу через уязвимость. Может ли он прочитать /etc/shadow?</div>
+            </div>
+
+            <div class="scenario-card" data-scenario="malware">
+                <div class="scenario-title">🦠 Вредоносное ПО (root)</div>
+                <div class="scenario-desc">Вредонос запущен с правами суперпользователя. Может ли он удалить системные файлы?</div>
+            </div>
+
+            <div class="scenario-card" data-scenario="containerEscape">
+                <div class="scenario-title">🐳 Побег из контейнера</div>
+                <div class="scenario-desc">Процесс в контейнере пытается получить доступ к файлам хоста</div>
+            </div>
+
+            <div class="scenario-card" data-scenario="privilegeEscalation">
+                <div class="scenario-title">⚡ Эскалация привилегий</div>
+                <div class="scenario-desc">Пользователь пытается использовать уязвимость в sudo для получения прав администратора</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Сравнение -->
+    <section id="compare">
+        <h2>Реакция моделей безопасности</h2>
+
+        <div class="scenario-content" id="scenario-content" style="display: none;">
+            <!-- Заголовок сценария -->
+            <div class="card">
+                <h3 id="scenario-title">Заголовок сценария</h3>
+                <p id="scenario-description" class="scenario-description"></p>
+            </div>
+
+            <!-- DAC -->
+            <div class="card">
+                <div class="panel-header">
+                    <h3 class="panel-title dac">DAC (chmod/ACL)</h3>
+                    <span class="badge dac">Дискреционный контроль</span>
+                </div>
+
+                <div class="table-container">
+                    <table id="table-dac">
+                        <thead>
+                        <tr>
+                            <th>Пользователь</th>
+                            <th>Действие</th>
+                            <th>Цель</th>
+                            <th>Результат</th>
+                            <th>Объяснение</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Заполняется из JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MAC -->
+            <div class="card">
+                <div class="panel-header">
+                    <h3 class="panel-title mac">MAC (SELinux/AppArmor)</h3>
+                    <span class="badge mac">Мандатный контроль</span>
+                </div>
+
+                <div class="table-container">
+                    <table id="table-mac">
+                        <thead>
+                        <tr>
+                            <th>Контекст процесса</th>
+                            <th>Целевой тип</th>
+                            <th>Действие</th>
+                            <th>Результат</th>
+                            <th>Объяснение</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Заполняется из JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Вывод -->
+            <div class="card" id="lesson-card" style="display: none;">
+                <h3>💡 Ключевой вывод</h3>
+                <p id="lesson-text"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Инструкция -->
+    <section>
+        <h2>Как использовать</h2>
+
+        <div class="card">
+            <ol style="margin-left: 2rem; line-height: 2;">
+                <li><strong>Выберите сценарий</strong> — кликните на любой из четырёх вариантов выше</li>
+                <li><strong>Посмотрите на таблицы</strong> — в первой показано поведение DAC, во второй — MAC</li>
+                <li><strong>Сравните результаты</strong> — обратите внимание, как разные модели реагируют на одинаковые угрозы</li>
+                <li><strong>Прочитайте вывод</strong> — внизу отображается ключевой урок для каждого сценария</li>
+            </ol>
+
+            <div class="note" style="margin-top: 1.5rem;">
+                <h3>🎯 Для преподавателя</h3>
+                <p>Этот инструмент демонстрирует фундаментальное отличие: <strong>DAC зависит от прав владельца файла, а MAC — от централизованной политики безопасности</strong>. MAC обеспечивает защиту даже в случаях, когда DAC бессилен (например, против атак от имени суперпользователя).</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <p>Сравнительный анализ · Механизмы контроля доступа</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Практическая демонстрация разницы между DAC и MAC</p>
+    </div>
+</footer>
+
+<script src="Simular.js"></script>
+</body>
+</html>

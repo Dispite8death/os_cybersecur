@@ -1,0 +1,689 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #00ff88;
+    --primary-dark: #00cc6a;
+    --secondary: #0099ff;
+    --danger: #ff4d4d;
+    --warning: #ffc107;
+    --dark: #0a0c0f;
+    --darker: #050607;
+    --light: #e0e0e0;
+    --gray: #2a2e35;
+    --card-bg: rgba(20, 25, 35, 0.9);
+    --border: rgba(0, 255, 136, 0.2);
+    --code-bg: #1e1e1e;
+    --success: #00cc6a;
+    --info: #0099ff;
+    --bios: #ff6b6b;
+    --uefi: #4ecdc4;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--light);
+    line-height: 1.6;
+    background-color: var(--darker);
+    background-image:
+            linear-gradient(0deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent);
+    background-size: 50px 50px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Шапка */
+header {
+    background: rgba(5, 6, 7, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+nav ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+nav a {
+    color: var(--light);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--primary);
+}
+
+/* Основной контент */
+main {
+    padding: 3rem 0;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-left: 4px solid var(--primary);
+    padding-left: 1.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin: 2.5rem 0 1.5rem;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 1rem;
+    color: var(--secondary);
+}
+
+h4 {
+    font-size: 1.2rem;
+    margin: 1rem 0 0.5rem;
+    color: var(--warning);
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.intro-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+/* Бейджи сравнения */
+.comparison-badge {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.badge.bios {
+    background: rgba(255, 107, 107, 0.2);
+    color: var(--bios);
+    border: 1px solid rgba(255, 107, 107, 0.4);
+}
+
+.badge.uefi {
+    background: rgba(78, 205, 196, 0.2);
+    color: var(--uefi);
+    border: 1px solid rgba(78, 205, 196, 0.4);
+}
+
+/* Схема загрузочного процесса */
+.boot-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.flow-stage {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.flow-stage:hover {
+    border-color: var(--primary);
+    transform: translateX(5px);
+}
+
+.flow-stage.active {
+    background: rgba(0, 255, 136, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+.flow-number {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.flow-content h3 {
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+.flow-arrow {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--primary);
+}
+
+/* Контролы */
+.controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.control-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    color: var(--light);
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary);
+}
+
+.control-btn.play-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    color: var(--dark);
+    font-weight: 600;
+}
+
+.control-btn.play-btn:hover {
+    transform: scale(1.05);
+}
+
+.control-btn.play-btn.playing {
+    background: linear-gradient(135deg, var(--danger), #cc3a3a);
+}
+
+/* Структура загрузочной записи */
+.boot-entry-structure {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.entry-field {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.entry-field:last-child {
+    border-bottom: none;
+}
+
+.field-name {
+    display: inline-block;
+    width: 150px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.field-desc {
+    color: #999;
+}
+
+/* Список загрузочных записей */
+.boot-entries-list {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+/* Secure Boot процесс */
+.secure-boot-process {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.secure-step {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.secure-step:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.step-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.signature-check {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.check-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.check-item:last-child {
+    border-bottom: none;
+}
+
+.check-label {
+    font-weight: 500;
+    color: #999;
+}
+
+.check-value {
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.check-value.sig-ok,
+.check-value.cert-ok,
+.check-value.chain-ok,
+.check-value.hash-ok {
+    color: var(--success);
+}
+
+.check-value.status-ok {
+    color: var(--success);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Базы ключей */
+.key-bases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.key-base {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.key-base h4 {
+    color: var(--warning);
+    margin-bottom: 0.75rem;
+}
+
+/* Инструменты */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.tool-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+}
+
+.tool-card h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+}
+
+.code-block code {
+    color: var(--primary);
+}
+
+.tool-features {
+    margin: 1rem 0;
+    list-style: none;
+}
+
+.tool-features li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.tool-features li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+}
+
+/* Резервный путь */
+.fallback-paths {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.path-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.path-item:last-child {
+    border-bottom: none;
+}
+
+.path-arch {
+    display: inline-block;
+    width: 80px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.path-location {
+    font-family: monospace;
+    color: var(--light);
+}
+
+.fallback-diagram {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.fallback-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.step-num {
+    width: 30px;
+    height: 30px;
+    background: var(--primary);
+    color: var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.step-text {
+    font-family: monospace;
+}
+
+.fallback-step.success .step-num {
+    background: var(--success);
+}
+
+.fallback-arrow {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+/* Практические сценарии */
+.dual-boot-example {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.boot-entry {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.boot-entry:last-child {
+    border-bottom: none;
+}
+
+.entry-number {
+    display: inline-block;
+    width: 60px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.entry-name {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.entry-path {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #999;
+}
+
+.recovery-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.recovery-step {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.step-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.step-text {
+    display: block;
+    color: #999;
+}
+
+.disable-secure-boot {
+    margin: 1.5rem 0;
+    padding-left: 2rem;
+}
+
+.disable-secure-boot li {
+    margin-bottom: 0.75rem;
+}
+
+.warning {
+    background: rgba(255, 77, 77, 0.1);
+    border-left: 4px solid var(--danger);
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.warning h4 {
+    color: var(--danger);
+    margin-bottom: 0.5rem;
+}
+
+/* Подсветка кода */
+code {
+    background: var(--code-bg);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    color: var(--primary);
+}
+
+/* Заметки */
+.note {
+    background: rgba(0, 255, 136, 0.1);
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.note h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Подвал */
+footer {
+    background: rgba(5, 6, 7, 0.9);
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    margin-top: 3rem;
+    text-align: center;
+    color: #666;
+}
+
+.footer-subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1200px) {
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .secure-boot-process {
+        grid-template-columns: 1fr;
+    }
+
+    .key-bases {
+        grid-template-columns: 1fr;
+    }
+
+    .recovery-steps {
+        grid-template-columns: 1fr;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    nav ul {
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

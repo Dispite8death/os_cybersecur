@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UEFI Boot Manager · Управление загрузкой</title>
+  <link rel="stylesheet" href="UEFIBM.css">
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-content">
+      <span class="logo">⚙️ UEFI Boot Manager · Управление загрузкой</span>
+      <nav>
+        <ul>
+          <li><a href="#intro">Введение</a></li>
+          <li><a href="#structure">Структура</a></li>
+          <li><a href="#entries">Загрузочные записи</a></li>
+          <li><a href="#secure-boot">Secure Boot</a></li>
+          <li><a href="#tools">Инструменты</a></li>
+          <li><a href="#fallback">Fallback</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <h1>UEFI Boot Manager: Управление загрузкой системы</h1>
+
+  <section id="intro" class="card">
+    <p class="intro-text">
+      <strong>UEFI Boot Manager</strong> — это компонент прошивки, отвечающий за выбор и запуск операционной системы.
+      На этапе <strong>BDS (Boot Device Selection)</strong> UEFI сканирует доступные устройства, ищет загрузчики
+      и предоставляет пользователю меню выбора. В отличие от старого BIOS, который просто передавал управление
+      первому сектору диска (MBR), UEFI Boot Manager работает с файловой системой и понимает структуру ОС.
+    </p>
+
+    <div class="comparison-badge">
+      <span class="badge bios">BIOS (MBR)</span>
+      <span class="badge uefi">UEFI (Boot Manager)</span>
+    </div>
+  </section>
+
+  <section id="structure">
+    <h2>📊 Структура загрузочного процесса</h2>
+
+    <div class="boot-flow">
+      <div class="flow-stage active" id="stage-1">
+        <div class="flow-number">1</div>
+        <div class="flow-content">
+          <h3>Инициализация</h3>
+          <p>UEFI завершил фазу DXE и перешёл к выбору устройства загрузки</p>
+        </div>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-stage" id="stage-2">
+        <div class="flow-number">2</div>
+        <div class="flow-content">
+          <h3>Сканирование устройств</h3>
+          <p>Поиск всех доступных загрузочных устройств (диски, сетевые интерфейсы, USB)</p>
+        </div>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-stage" id="stage-3">
+        <div class="flow-number">3</div>
+        <div class="flow-content">
+          <h3>Чтение NVRAM</h3>
+          <p>Загрузка переменных <code>BootOrder</code>, <code>Boot####</code> из энергонезависимой памяти</p>
+        </div>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-stage" id="stage-4">
+        <div class="flow-number">4</div>
+        <div class="flow-content">
+          <h3>Проверка загрузчиков</h3>
+          <p>Поиск файлов <code>.efi</code> в папке <code>/EFI/</code> на каждом устройстве</p>
+        </div>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-stage" id="stage-5">
+        <div class="flow-number">5</div>
+        <div class="flow-content">
+          <h3>Secure Boot</h3>
+          <p>Проверка цифровой подписи загрузчика (если включено)</p>
+        </div>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-stage" id="stage-6">
+        <div class="flow-number">6</div>
+        <div class="flow-content">
+          <h3>Передача управления</h3>
+          <p>Запуск выбранного загрузчика (<code>bootmgfw.efi</code>, <code>grubx64.efi</code>)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="control-btn" onclick="prevStage()">◀ Назад</button>
+      <button class="control-btn play-btn" onclick="toggleAutoPlay()">
+        <span id="play-icon">▶</span> Автовоспроизведение
+      </button>
+      <button class="control-btn" onclick="nextStage()">Вперёд ▶</button>
+    </div>
+  </section>
+
+  <section id="entries" class="card">
+    <h2>📋 Загрузочные записи (Boot Entries)</h2>
+
+    <p>UEFI Boot Manager хранит информацию о доступных загрузчиках в энергонезависимой памяти (NVRAM).
+      Каждая запись имеет уникальный идентификатор и содержит путь к файлу загрузчика.</p>
+
+    <h3>Структура записи</h3>
+    <div class="boot-entry-structure">
+      <div class="entry-field">
+        <span class="field-name">Boot####</span>
+        <span class="field-desc">Уникальный идентификатор (например, <code>Boot0001</code>)</span>
+      </div>
+      <div class="entry-field">
+        <span class="field-name">Description</span>
+        <span class="field-desc">Название загрузчика («Windows Boot Manager», «ubuntu»)</span>
+      </div>
+      <div class="entry-field">
+        <span class="field-name">FilePath</span>
+        <span class="field-desc">Путь к файлу (например, <code>\EFI\Microsoft\Boot\bootmgfw.efi</code>)</span>
+      </div>
+      <div class="entry-field">
+        <span class="field-name">OptionalData</span>
+        <span class="field-desc">Дополнительные параметры (например, <code>initrd=</code> для Linux)</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 2rem;">Текущие загрузочные записи</h3>
+    <div class="boot-entries-list" id="boot-entries">
+      <!-- Динамически генерируется в скрипте -->
+    </div>
+
+    <div class="note">
+      <h4>💡 Как это работает?</h4>
+      <p>
+        При загрузке UEFI Boot Manager читает переменную <code>BootOrder</code> (например, <code>0001,0002,0003</code>),
+        которая определяет приоритет загрузки. Затем последовательно пытается запустить загрузчики в указанном порядке,
+        пока один из них не удастся.
+      </p>
+    </div>
+  </section>
+
+  <section id="secure-boot" class="card">
+    <h2>🔒 Secure Boot: Защита загрузчика</h2>
+
+    <div class="secure-boot-process">
+      <div class="secure-step">
+        <div class="step-icon">1️⃣</div>
+        <h3>Поиск загрузчика</h3>
+        <p>Boot Manager находит файл <code>bootx64.efi</code> на выбранном устройстве</p>
+      </div>
+
+      <div class="secure-step">
+        <div class="step-icon">2️⃣</div>
+        <h3>Извлечение подписи</h3>
+        <p>Из PE-заголовка файла извлекается цифровая подпись (Authenticode)</p>
+      </div>
+
+      <div class="secure-step">
+        <div class="step-icon">3️⃣</div>
+        <h3>Проверка сертификата</h3>
+        <p>Подпись проверяется цепочкой доверия: <code>PK → KEK → db</code></p>
+      </div>
+
+      <div class="secure-step">
+        <div class="step-icon">4️⃣</div>
+        <h3>Сравнение хэшей</h3>
+        <p>Хэш файла сравнивается с хэшем из расшифрованной подписи</p>
+      </div>
+
+      <div class="secure-step">
+        <div class="step-icon">5️⃣</div>
+        <h3>Принятие решения</h3>
+        <p>Если всё совпадает — загрузка разрешена. Иначе — ошибка <code>SECURE BOOT VIOLATION</code></p>
+      </div>
+    </div>
+
+    <div class="signature-check">
+      <div class="check-item">
+        <span class="check-label">Файл:</span>
+        <span class="check-value">bootmgfw.efi</span>
+      </div>
+      <div class="check-item">
+        <span class="check-label">Подпись:</span>
+        <span class="check-value sig-ok">✅ Найдена</span>
+      </div>
+      <div class="check-item">
+        <span class="check-label">Сертификат:</span>
+        <span class="check-value cert-ok">✅ Microsoft Windows Production PCA 2011</span>
+      </div>
+      <div class="check-item">
+        <span class="check-label">Цепочка:</span>
+        <span class="check-value chain-ok">✅ PK → KEK → db</span>
+      </div>
+      <div class="check-item">
+        <span class="check-label">Хэш:</span>
+        <span class="check-value hash-ok">✅ Совпадает</span>
+      </div>
+      <div class="check-item result">
+        <span class="check-label">Статус:</span>
+        <span class="check-value status-ok">✅ ЗАГРУЗКА РАЗРЕШЕНА</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 2rem;">Базы ключей Secure Boot</h3>
+    <div class="key-bases">
+      <div class="key-base">
+        <h4>PK (Platform Key)</h4>
+        <p>Ключ платформы — главный ключ, определяющий режим Secure Boot. Если не установлен — Secure Boot отключён.</p>
+      </div>
+      <div class="key-base">
+        <h4>KEK (Key Exchange Keys)</h4>
+        <p>Ключи обмена — используются для подписи обновлений прошивки и базы <code>db</code>.</p>
+      </div>
+      <div class="key-base">
+        <h4>db (Signature Database)</h4>
+        <p>База допустимых подписей — содержит сертификаты доверенных загрузчиков (Microsoft, Canonical и др.).</p>
+      </div>
+      <div class="key-base">
+        <h4>dbx (Forbidden Signatures)</h4>
+        <p>База запрещённых подписей — содержит отозванные сертификаты и известные вредоносные хэши.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <h2>🛠️ Инструменты управления</h2>
+
+    <div class="tools-grid">
+      <div class="tool-card">
+        <h3>Linux: efibootmgr</h3>
+        <p>Командная утилита для просмотра и изменения загрузочных записей из-под Linux.</p>
+
+        <div class="code-block">
+                        <pre><code># Просмотр всех записей
+sudo efibootmgr -v
+
+# Добавить новую запись
+sudo efibootmgr -c -d /dev/sda -p 1 \
+  -L "My Custom OS" \
+  -l \\EFI\\custom\\bootx64.efi
+
+# Изменить порядок загрузки
+sudo efibootmgr -o 0003,0001,0002
+
+# Удалить запись
+sudo efibootmgr -b 0004 -B</code></pre>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <h3>Windows: bcdedit</h3>
+        <p>Встроенная утилита управления загрузчиком Windows (Boot Configuration Data).</p>
+
+        <div class="code-block">
+                        <pre><code># Просмотр конфигурации
+bcdedit /enum firmware
+
+# Добавить загрузочную запись
+bcdedit /copy {bootmgr} /d "Linux"
+bcdedit /set {fwbootmgr} displayorder {bootmgr} {GUID} /addfirst
+
+# Изменить таймаут
+bcdedit /set {bootmgr} timeout 5
+
+# Удалить запись
+bcdedit /delete {GUID}</code></pre>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <h3>UEFI Shell</h3>
+        <p>Интерактивная оболочка, встроенная в прошивку. Позволяет управлять загрузкой без ОС.</p>
+
+        <div class="code-block">
+                        <pre><code># Просмотр записей
+bcfg boot dump -v
+
+# Добавить запись
+bcfg boot add 3 fs0:\EFI\ubuntu\grubx64.efi "Ubuntu"
+
+# Удалить запись
+bcfg boot rm 2
+
+# Изменить порядок
+bcfg boot move 1 3</code></pre>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <h3>Setup Utility</h3>
+        <p>Графический интерфейс в настройках прошивки (клавиша Del/F2/F12 при загрузке).</p>
+
+        <ul class="tool-features">
+          <li>Просмотр и изменение порядка загрузки</li>
+          <li>Включение/выключение Secure Boot</li>
+          <li>Управление ключами (PK, KEK, db, dbx)</li>
+          <li>Загрузка с внешних устройств</li>
+          <li>Сброс настроек до заводских</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="fallback" class="card">
+    <h2>🔄 Fallback Boot Path: Резервный загрузчик</h2>
+
+    <p>Если основной загрузчик недоступен или повреждён, UEFI использует <strong>резервный путь загрузки</strong>
+      (Fallback Boot Path). Это механизм аварийного восстановления, который ищет загрузчик в стандартном месте.</p>
+
+    <h3>Стандартные пути резервной загрузки</h3>
+    <div class="fallback-paths">
+      <div class="path-item">
+        <span class="path-arch">x64</span>
+        <span class="path-location"><code>/EFI/BOOT/BOOTX64.EFI</code></span>
+      </div>
+      <div class="path-item">
+        <span class="path-arch">IA32</span>
+        <span class="path-location"><code>/EFI/BOOT/BOOTIA32.EFI</code></span>
+      </div>
+      <div class="path-item">
+        <span class="path-arch">ARM64</span>
+        <span class="path-location"><code>/EFI/BOOT/BOOTAA64.EFI</code></span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 2rem;">Когда используется резервный путь?</h3>
+    <ul class="scenario-list">
+      <li>Нет записей в <code>BootOrder</code> (NVRAM сброшен)</li>
+      <li>Все загрузочные записи неудачны (файлы удалены/повреждены)</li>
+      <li>Загрузка с внешнего носителя (установочная флешка)</li>
+      <li>Режим восстановления после сбоя прошивки</li>
+    </ul>
+
+    <div class="fallback-diagram">
+      <div class="fallback-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Проверка <code>BootOrder</code></span>
+      </div>
+      <div class="fallback-arrow">→</div>
+      <div class="fallback-step">
+        <span class="step-num">2</span>
+        <span class="step-text">Все записи неудачны?</span>
+      </div>
+      <div class="fallback-arrow">→</div>
+      <div class="fallback-step">
+        <span class="step-num">3</span>
+        <span class="step-text">Поиск <code>BOOTX64.EFI</code></span>
+      </div>
+      <div class="fallback-arrow">→</div>
+      <div class="fallback-step success">
+        <span class="step-num">✓</span>
+        <span class="step-text"><strong>Загрузка успешна</strong></span>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>💡 Создание загрузочной флешки</h4>
+      <p>
+        Именно поэтому при создании загрузочной флешки файлы нужно копировать в папку
+        <code>/EFI/BOOT/</code> с именем <code>BOOTX64.EFI</code> — так система найдёт их через резервный путь,
+        даже если нет записей в NVRAM.
+      </p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🔧 Практические сценарии</h2>
+
+    <h3>1. Двойная загрузка Windows + Linux</h3>
+    <p>При установке двух ОС каждая создаёт свою загрузочную запись:</p>
+
+    <div class="dual-boot-example">
+      <div class="boot-entry">
+        <span class="entry-number">0001</span>
+        <span class="entry-name">Windows Boot Manager</span>
+        <span class="entry-path"><code>\EFI\Microsoft\Boot\bootmgfw.efi</code></span>
+      </div>
+      <div class="boot-entry">
+        <span class="entry-number">0002</span>
+        <span class="entry-name">ubuntu</span>
+        <span class="entry-path"><code>\EFI\ubuntu\grubx64.efi</code></span>
+      </div>
+      <div class="boot-entry">
+        <span class="entry-number">0003</span>
+        <span class="entry-name">Fedora</span>
+        <span class="entry-path"><code>\EFI\fedora\shimx64.efi</code></span>
+      </div>
+    </div>
+
+    <p>GRUB (или другой загрузчик Linux) обычно перехватывает управление и показывает своё меню,
+      позволяя выбрать между ОС без входа в меню UEFI.</p>
+
+    <h3 style="margin-top: 2rem;">2. Восстановление после сбоя</h3>
+    <p>Если загрузчик повреждён, можно восстановить через резервный путь:</p>
+
+    <div class="recovery-steps">
+      <div class="recovery-step">
+        <span class="step-icon">🔧</span>
+        <span class="step-text">Создать загрузочную флешку с <code>BOOTX64.EFI</code></span>
+      </div>
+      <div class="recovery-step">
+        <span class="step-icon">💾</span>
+        <span class="step-text">Загрузиться с флешки через меню выбора (F12)</span>
+      </div>
+      <div class="recovery-step">
+        <span class="step-icon">🔄</span>
+        <span class="step-text">Переустановить загрузчик в нужную папку (например, <code>/EFI/Microsoft/Boot/</code>)</span>
+      </div>
+      <div class="recovery-step">
+        <span class="step-icon">✅</span>
+        <span class="step-text">Создать запись через <code>efibootmgr</code> или <code>bcfg</code></span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 2rem;">3. Отключение Secure Boot для кастомных ОС</h3>
+    <p>Некоторые ОС (например, старые версии Linux или специализированные дистрибутивы)
+      не имеют подписанных загрузчиков. В этом случае нужно:</p>
+
+    <ol class="disable-secure-boot">
+      <li>Войти в настройки прошивки (клавиша Del/F2 при загрузке)</li>
+      <li>Найти раздел <code>Security</code> или <code>Boot</code></li>
+      <li>Отключить <code>Secure Boot</code></li>
+      <li>Сохранить изменения и перезагрузиться</li>
+    </ol>
+
+    <div class="warning">
+      <h4>⚠️ Внимание</h4>
+      <p>
+        Отключение Secure Boot снижает безопасность системы. Используйте только для доверенных ОС
+        или в средах разработки. Для продакшена рекомендуется подписать свой загрузчик собственным ключом.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>UEFI Boot Manager · Управление загрузкой системы</p>
+    <p class="footer-subtitle">От выбора ОС до резервного пути загрузки</p>
+  </div>
+</footer>
+
+<script src="UEFIBM.js"></script>
+</body>
+</html>

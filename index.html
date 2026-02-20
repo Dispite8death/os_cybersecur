@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Безопасность операционных систем</title>
+  <link rel="stylesheet" href="src/main.css" />
+</head>
+<body>
+<div class="carbon-bg">
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <span class="logo">🔐 OS Security</span>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="AccessСontrol.html" class="nav-link">DAC vs MAC</a></li>
+            <li><a href="#isolation" class="nav-link">Изоляция</a></li>
+            <li><a href="OSLoad.html" class="nav-link">Безопасная загрузка</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <!-- Hero секция -->
+      <section class="hero">
+        <h1 class="glitch" data-text="Безопасность операционных систем">Безопасность операционных систем</h1>
+        <p class="subtitle">Три доклада по механизмам защиты в Linux и Windows</p>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-number">3</span>
+            <span class="stat-label">доклада</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">2</span>
+            <span class="stat-label">ОС</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">🔒</span>
+            <span class="stat-label">кибербезопасность</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Карточки докладов -->
+      <section class="reports-grid">
+        <!-- Доклад 1: DAC vs MAC -->
+        <article id="dac-mac" class="report-card">
+          <div class="card-header">
+            <span class="report-number">01</span>
+            <h2>Механизмы контроля доступа</h2>
+          </div>
+          <div class="card-badges">
+            <span class="badge linux">Linux</span>
+            <span class="badge windows">Windows</span>
+            <span class="badge compare">DAC vs MAC</span>
+          </div>
+          <p class="card-description">
+            Сравнение дискреционного (DAC) и мандатного (MAC) подходов.
+            Разбираем на примерах chmod, SELinux, AppArmor и Mandatory Integrity Control в Windows.
+          </p>
+          <div class="card-footer">
+            <a href="AccessСontrol.html" class="btn primary">Смотреть доклад →</a>
+          </div>
+        </article>
+
+        <!-- Доклад 2: Изоляция процессов -->
+        <article id="isolation" class="report-card">
+          <div class="card-header">
+            <span class="report-number">02</span>
+            <h2>Изоляция процессов и защита памяти</h2>
+          </div>
+          <div class="card-badges">
+            <span class="badge linux">Linux</span>
+            <span class="badge windows">Windows</span>
+            <span class="badge security">MMU/ASLR</span>
+          </div>
+          <p class="card-description">
+            Как ОС предотвращает несанкционированный доступ между приложениями.
+            Виртуальная память, кольца защиты, ASLR, DEP/NX и уязвимости типа Meltdown/Spectre.
+          </p>
+          <div class="card-footer">
+            <a href="#" class="btn primary">Смотреть доклад →</a>
+          </div>
+        </article>
+
+        <!-- Доклад 3: Безопасная загрузка -->
+        <article id="boot" class="report-card">
+          <div class="card-header">
+            <span class="report-number">03</span>
+            <h2>Безопасность загрузки ОС</h2>
+          </div>
+          <div class="card-badges">
+            <span class="badge linux">Linux</span>
+            <span class="badge windows">Windows</span>
+            <span class="badge boot">Secure Boot</span>
+          </div>
+          <p class="card-description">
+            Механизмы цифровой подписи ядра, UEFI Secure Boot, защита от руткитов на этапе инициализации.
+            Сравнение подходов в Windows (ELAM) и Linux (MOK, shim).
+          </p>
+          <div class="card-footer">
+            <a href="OSLoad.html" class="btn primary">Смотреть доклад →</a>
+          </div>
+        </article>
+      </section>
+
+      <!-- Сравнительная таблица (превью) -->
+      <section class="preview-table">
+        <h2>Ключевые отличия</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+            <tr>
+              <th>Механизм</th>
+              <th>Linux</th>
+              <th>Windows</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>Дискреционный доступ</td>
+              <td>chmod, chown, ACL</td>
+              <td>NTFS permissions</td>
+            </tr>
+            <tr>
+              <td>Мандатный доступ</td>
+              <td>SELinux, AppArmor</td>
+              <td>MIC (Mandatory Integrity Control)</td>
+            </tr>
+            <tr>
+              <td>Изоляция памяти</td>
+              <td>MMU, ASLR, KASLR</td>
+              <td>MMU, ASLR, KASLR</td>
+            </tr>
+            <tr>
+              <td>Безопасная загрузка</td>
+              <td>shim + MOK</td>
+              <td>UEFI Secure Boot + ELAM</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 · Доклады по безопасности операционных систем</p>
+      <p class="footer-note">Информационная безопасность · Сравнение подходов</p>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UEFI Firmware · Загрузка системы</title>
+  <link rel="stylesheet" href="UEFI.css">
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-content">
+      <span class="logo">💻 UEFI Firmware · Загрузка системы</span>
+      <nav>
+        <ul>
+          <li><a href="#intro">Введение</a></li>
+          <li><a href="#stages">Этапы</a></li>
+          <li><a href="#secure-boot">Secure Boot</a></li>
+          <li><a href="#vs-bios">BIOS vs UEFI</a></li>
+          <li><a href="#os-boot">Загрузка ОС</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <h1>UEFI Firmware: Процесс загрузки системы</h1>
+
+  <section id="intro" class="card">
+    <p class="intro-text">
+      UEFI (Unified Extensible Firmware Interface) — это современная прошивка, которая заменила устаревший BIOS.
+      После выполнения кода из <strong>Boot ROM</strong> процессор передаёт управление коду из внешней микросхемы памяти,
+      где хранится полная прошивка UEFI. Этот процесс включает несколько фаз, каждая из которых выполняет свою задачу
+      по подготовке системы к загрузке операционной системы.
+    </p>
+
+    <div class="comparison-badge">
+      <span class="badge bios">BIOS</span>
+      <span class="badge uefi">UEFI</span>
+    </div>
+  </section>
+
+  <section id="stages">
+    <h2>📊 Этапы загрузки UEFI</h2>
+
+    <div class="timeline-container">
+      <div class="timeline-stage active" id="stage-sec">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>SEC · Security Phase</h3>
+          <p class="stage-duration">0-10 мс</p>
+          <div class="stage-desc">
+            <p><strong>Первая фаза после Boot ROM.</strong> Процессор выполняет минимальную инициализацию и переходит к следующему этапу.</p>
+            <ul>
+              <li>Настройка базовых регистров процессора</li>
+              <li>Инициализация кэша как временной памяти</li>
+              <li>Подготовка стека для вызова функций</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-stage" id="stage-pei">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>PEI · Pre-EFI Initialization</h3>
+          <p class="stage-duration">10-50 мс</p>
+          <div class="stage-desc">
+            <p><strong>Инициализация критических компонентов.</strong> На этом этапе ещё нет полного доступа к памяти.</p>
+            <ul>
+              <li>Инициализация контроллера памяти</li>
+              <li>Обнаружение основных чипов (чипсет, южный/северный мост)</li>
+              <li>Подготовка временного хранилища данных</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-stage" id="stage-dxe">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>DXE · Driver Execution Environment</h3>
+          <p class="stage-duration">50-500 мс</p>
+          <div class="stage-desc">
+            <p><strong>Основная фаза загрузки.</strong> Загружаются драйверы устройств и инициализируются все компоненты системы.</p>
+            <ul>
+              <li>Загрузка драйверов устройств из микросхемы памяти</li>
+              <li>Инициализация видеокарты, сетевых адаптеров, USB-контроллеров</li>
+              <li>Создание таблиц системной конфигурации (ACPI, SMBIOS)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-stage" id="stage-bds">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>BDS · Boot Device Selection</h3>
+          <p class="stage-duration">500-1000 мс</p>
+          <div class="stage-desc">
+            <p><strong>Выбор устройства загрузки.</strong> Система сканирует доступные устройства и ищет загрузчик ОС.</p>
+            <ul>
+              <li>Сканирование дисков, сетевых интерфейсов, USB-устройств</li>
+              <li>Поиск файлов загрузчика (bootx64.efi, grubx64.efi)</li>
+              <li>Проверка цифровой подписи загрузчика (если включён Secure Boot)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-stage" id="stage-tsl">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>TSL · Transient System Load</h3>
+          <p class="stage-duration">1000-1500 мс</p>
+          <div class="stage-desc">
+            <p><strong>Подготовка к передаче управления.</strong> Финальная настройка перед запуском ОС.</p>
+            <ul>
+              <li>Передача таблиц памяти ядру ОС</li>
+              <li>Настройка параметров загрузки</li>
+              <li>Подготовка окружения для ядра</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-stage" id="stage-rt">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>RT · Runtime</h3>
+          <p class="stage-duration">1500+ мс</p>
+          <div class="stage-desc">
+            <p><strong>Режим работы после загрузки ОС.</strong> UEFI остаётся доступной для вызова из операционной системы.</p>
+            <ul>
+              <li>Предоставление сервисов времени (GetTime, SetTime)</li>
+              <li>Доступ к переменным среды (NVRAM)</li>
+              <li>Управление питанием и перезагрузкой</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="control-btn" onclick="prevStage()">◀ Назад</button>
+      <button class="control-btn play-btn" onclick="toggleAutoPlay()">
+        <span id="play-icon">▶</span> Автовоспроизведение
+      </button>
+      <button class="control-btn" onclick="nextStage()">Вперёд ▶</button>
+    </div>
+  </section>
+
+  <section id="secure-boot" class="card">
+    <h2>🔒 Secure Boot: Защита от вредоносной загрузки</h2>
+
+    <div class="secure-boot-grid">
+      <div class="secure-boot-step">
+        <div class="step-number">1</div>
+        <h3>Чтение загрузчика</h3>
+        <p>UEFI находит файл загрузчика (например, <code>bootx64.efi</code>) на выбранном устройстве.</p>
+      </div>
+
+      <div class="secure-boot-step">
+        <div class="step-number">2</div>
+        <h3>Извлечение подписи</h3>
+        <p>Из загрузчика извлекается цифровая подпись (обычно в формате PKCS#7).</p>
+      </div>
+
+      <div class="secure-boot-step">
+        <div class="step-number">3</div>
+        <h3>Проверка сертификата</h3>
+        <p>Подпись проверяется публичным ключом, который хранится в защищённой памяти материнской платы (NVRAM).</p>
+      </div>
+
+      <div class="secure-boot-step">
+        <div class="step-number">4</div>
+        <h3>Сравнение хэшей</h3>
+        <p>Хэш загруженного файла сравнивается с хэшем, полученным из расшифрованной подписи.</p>
+      </div>
+
+      <div class="secure-boot-step">
+        <div class="step-number">5</div>
+        <h3>Принятие решения</h3>
+        <p>Если хэши совпадают и сертификат доверенный — загрузка разрешена. Иначе — ошибка.</p>
+      </div>
+    </div>
+
+    <div class="signature-verification">
+      <div class="verification-item">
+        <span class="verification-label">Загрузчик:</span>
+        <span class="verification-value">bootx64.efi</span>
+      </div>
+      <div class="verification-item">
+        <span class="verification-label">Подпись:</span>
+        <span class="verification-value sig-present">✅ Найдена</span>
+      </div>
+      <div class="verification-item">
+        <span class="verification-label">Сертификат:</span>
+        <span class="verification-value cert-valid">✅ Доверенный (Microsoft)</span>
+      </div>
+      <div class="verification-item">
+        <span class="verification-label">Хэш:</span>
+        <span class="verification-value hash-match">✅ Совпадает</span>
+      </div>
+      <div class="verification-item result">
+        <span class="verification-label">Результат:</span>
+        <span class="verification-value status-allowed">✅ ЗАГРУЗКА РАЗРЕШЕНА</span>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>⚠️ Что будет при неудачной проверке?</h4>
+      <p>
+        Если загрузчик не подписан или подпись недействительна, система выдаст ошибку:
+        <code>SECURE BOOT VIOLATION</code> или просто зависнет на чёрном экране.
+        Это защита от руткитов вроде <strong>LoJax</strong> или <strong>Stoned Bootkit</strong>.
+      </p>
+    </div>
+  </section>
+
+  <section id="vs-bios">
+    <h2>🆚 BIOS vs UEFI: Ключевые отличия</h2>
+
+    <div class="comparison-grid">
+      <div class="comparison-card">
+        <h3 class="card-title bios">BIOS (Legacy)</h3>
+        <ul class="comparison-list">
+          <li><strong>16-битный режим</strong> — ограничен 1 МБ памяти</li>
+          <li><strong>MBR-разметка</strong> — максимум 4 первичных раздела</li>
+          <li><strong>Нет криптографии</strong> — любой код может загрузиться</li>
+          <li><strong>Медленная загрузка</strong> — последовательная инициализация</li>
+          <li><strong>Текстовый интерфейс</strong> — только клавиатура</li>
+          <li><strong>Нет драйверов</strong> — только базовая функциональность</li>
+        </ul>
+      </div>
+
+      <div class="comparison-card">
+        <h3 class="card-title uefi">UEFI (Modern)</h3>
+        <ul class="comparison-list">
+          <li><strong>32/64-битный режим</strong> — прямой доступ к ГБ памяти</li>
+          <li><strong>GPT-разметка</strong> — до 128 разделов, диски до 9.4 ЗБ</li>
+          <li><strong>Secure Boot</strong> — проверка подписи загрузчика</li>
+          <li><strong>Быстрая загрузка</strong> — параллельная инициализация</li>
+          <li><strong>Графический интерфейс</strong> — поддержка мыши и тачпада</li>
+          <li><strong>Встроенные драйверы</strong> — сетевые, файловые системы</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="os-boot" class="card">
+    <h2>🚀 Загрузка операционной системы</h2>
+
+    <h3>Поиск загрузчика</h3>
+    <p>
+      На этапе <strong>BDS</strong> UEFI сканирует все доступные устройства в порядке, указанном в настройках:
+    </p>
+
+    <div class="boot-order">
+      <div class="boot-device active">
+        <span class="device-icon">💽</span>
+        <span class="device-name">NVMe SSD (Windows Boot Manager)</span>
+        <span class="device-status success">✅ Найден</span>
+      </div>
+      <div class="boot-device">
+        <span class="device-icon">💿</span>
+        <span class="device-name">SATA HDD (GRUB)</span>
+        <span class="device-status">Не выбран</span>
+      </div>
+      <div class="boot-device">
+        <span class="device-icon">🔌</span>
+        <span class="device-name">USB Drive</span>
+        <span class="device-status">Не подключён</span>
+      </div>
+      <div class="boot-device">
+        <span class="device-icon">🌐</span>
+        <span class="device-name">PXE Network Boot</span>
+        <span class="device-status">Не выбран</span>
+      </div>
+    </div>
+
+    <h3>Структура загрузчика UEFI</h3>
+    <div class="bootloader-structure">
+      <div class="structure-item">
+        <span class="structure-path">/EFI/</span>
+        <span class="structure-desc">Корневая папка UEFI</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">├── /BOOT/</span>
+        <span class="structure-desc">Стандартные загрузчики</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">│   └── bootx64.efi</span>
+        <span class="structure-desc">Fallback загрузчик (64-бит)</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">├── /Microsoft/</span>
+        <span class="structure-desc">Windows загрузчики</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">│   └── /Boot/</span>
+        <span class="structure-desc">Папка загрузки Windows</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">│       ├── bootmgfw.efi</span>
+        <span class="structure-desc">Windows Boot Manager</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">│       └── bootmgr.efi</span>
+        <span class="structure-desc">Загрузчик Windows</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">└── /ubuntu/</span>
+        <span class="structure-desc">Linux загрузчики</span>
+      </div>
+      <div class="structure-item">
+        <span class="structure-path">    └── grubx64.efi</span>
+        <span class="structure-desc">GRUB загрузчик</span>
+      </div>
+    </div>
+
+    <h3>Передача управления ядру</h3>
+    <p>
+      После успешной проверки загрузчика UEFI передаёт управление ядру операционной системы:
+    </p>
+
+    <div class="transfer-diagram">
+      <div class="transfer-step">
+        <span class="step-arrow">→</span>
+        <span class="step-text">UEFI вызывает <code>bootmgfw.efi</code></span>
+      </div>
+      <div class="transfer-step">
+        <span class="step-arrow">→</span>
+        <span class="step-text">Загрузчик читает <code>BCD</code> (Boot Configuration Data)</span>
+      </div>
+      <div class="transfer-step">
+        <span class="step-arrow">→</span>
+        <span class="step-text">Загружает ядро <code>ntoskrnl.exe</code> в память</span>
+      </div>
+      <div class="transfer-step">
+        <span class="step-arrow">→</span>
+        <span class="step-text">Передаёт управление на точку входа ядра</span>
+      </div>
+      <div class="transfer-step final">
+        <span class="step-arrow">✓</span>
+        <span class="step-text"><strong>Ядро ОС запущено</strong></span>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>💡 UEFI остаётся в памяти</h4>
+      <p>
+        Даже после передачи управления ядру, часть кода UEFI остаётся в памяти в режиме <strong>Runtime</strong>.
+        Операционная система может вызывать функции UEFI для:
+      <ul>
+        <li>Получения времени (<code>GetTime</code>)</li>
+        <li>Чтения/записи переменных среды (<code>GetVariable</code>, <code>SetVariable</code>)</li>
+        <li>Перезагрузки системы (<code>ResetSystem</code>)</li>
+      </ul>
+      </p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🔧 Технические детали</h2>
+
+    <h3>Таблицы памяти UEFI</h3>
+    <p>UEFI предоставляет операционной системе информацию о памяти через таблицу <strong>Memory Map</strong>:</p>
+
+    <div class="memory-map">
+      <div class="memory-row">
+        <span class="memory-type">Conventional</span>
+        <span class="memory-range">0x00000000 - 0x0009FFFF</span>
+        <span class="memory-desc">Обычная память (используется ОС)</span>
+      </div>
+      <div class="memory-row">
+        <span class="memory-type">Reserved</span>
+        <span class="memory-range">0x000A0000 - 0x000FFFFF</span>
+        <span class="memory-desc">Зарезервировано (видеопамять, прошивка)</span>
+      </div>
+      <div class="memory-row">
+        <span class="memory-type">ACPI Reclaim</span>
+        <span class="memory-range">0x00100000 - 0x001FFFFF</span>
+        <span class="memory-desc">Память для таблиц ACPI</span>
+      </div>
+      <div class="memory-row">
+        <span class="memory-type">UEFI Runtime</span>
+        <span class="memory-range">0x00200000 - 0x002FFFFF</span>
+        <span class="memory-desc">Код и данные UEFI (режим Runtime)</span>
+      </div>
+      <div class="memory-row">
+        <span class="memory-type">Conventional</span>
+        <span class="memory-range">0x00300000 - 0xFFFFFFFF</span>
+        <span class="memory-desc">Основная память (используется ОС)</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 2rem;">NVRAM: Хранение настроек</h3>
+    <p>UEFI использует энергонезависимую память (NVRAM) для хранения переменных:</p>
+
+    <div class="nvram-vars">
+      <div class="nvram-item">
+        <span class="nvram-name">BootOrder</span>
+        <span class="nvram-value">0001,0002,0003,0004</span>
+      </div>
+      <div class="nvram-item">
+        <span class="nvram-name">Boot0001</span>
+        <span class="nvram-value">Windows Boot Manager (HD)</span>
+      </div>
+      <div class="nvram-item">
+        <span class="nvram-name">Boot0002</span>
+        <span class="nvram-value">GRUB (HD)</span>
+      </div>
+      <div class="nvram-item">
+        <span class="nvram-name">SecureBoot</span>
+        <span class="nvram-value">Enabled</span>
+      </div>
+      <div class="nvram-item">
+        <span class="nvram-name">PK (Platform Key)</span>
+        <span class="nvram-value">Microsoft Corporation</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>UEFI Firmware · Процесс загрузки системы</p>
+    <p class="footer-subtitle">От передачи управления от Boot ROM до запуска ядра ОС</p>
+  </div>
+</footer>
+
+<script src="UEFI.js"></script>
+</body>
+</html>

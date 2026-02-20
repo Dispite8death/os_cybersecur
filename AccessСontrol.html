@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Механизмы контроля доступа · DAC vs MAC</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #00ff88;
+      --primary-dark: #00cc6a;
+      --secondary: #0099ff;
+      --danger: #ff4d4d;
+      --warning: #ffc107;
+      --dark: #0a0c0f;
+      --darker: #050607;
+      --light: #e0e0e0;
+      --gray: #2a2e35;
+      --card-bg: rgba(20, 25, 35, 0.9);
+      --border: rgba(0, 255, 136, 0.2);
+      --code-bg: #1e1e1e;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--light);
+      line-height: 1.6;
+      background-color: var(--darker);
+      background-image:
+              linear-gradient(0deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent),
+              linear-gradient(90deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent);
+      background-size: 50px 50px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Шапка */
+    header {
+      background: rgba(5, 6, 7, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    nav a {
+      color: var(--light);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: var(--primary);
+    }
+
+    /* Основной контент */
+    main {
+      padding: 3rem 0;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      border-left: 4px solid var(--primary);
+      padding-left: 1.5rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin: 2.5rem 0 1.5rem;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin: 1.5rem 0 1rem;
+      color: var(--secondary);
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge.linux {
+      background: rgba(0, 153, 255, 0.2);
+      color: #0099ff;
+      border: 1px solid rgba(0, 153, 255, 0.4);
+    }
+
+    .badge.windows {
+      background: rgba(0, 255, 136, 0.2);
+      color: var(--primary);
+      border: 1px solid rgba(0, 255, 136, 0.4);
+    }
+
+    .badge.mac {
+      background: rgba(255, 77, 77, 0.2);
+      color: #ff4d4d;
+      border: 1px solid rgba(255, 77, 77, 0.4);
+    }
+
+    .badge.dac {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      border: 1px solid rgba(255, 193, 7, 0.4);
+    }
+
+    /* Таблицы */
+    .table-container {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    th {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--primary);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Код */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    code {
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #00ff88;
+    }
+
+    .code-block {
+      position: relative;
+    }
+
+    .code-block::before {
+      content: '$';
+      position: absolute;
+      left: 0.5rem;
+      color: #666;
+    }
+
+    /* Схемы */
+    .diagram {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    .diagram pre {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-family: monospace;
+      font-size: 1rem;
+      line-height: 1.8;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Сетка для карточек */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      nav ul {
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+
+    /* Подвал */
+    footer {
+      background: rgba(5, 6, 7, 0.9);
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      margin-top: 3rem;
+      text-align: center;
+      color: #666;
+    }
+
+    /* Атаки */
+    .attack-card {
+      background: rgba(255, 77, 77, 0.1);
+      border-left: 4px solid var(--danger);
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .note {
+      background: rgba(0, 255, 136, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-content">
+      <span class="logo">🔐 OS Security · Доклад №1</span>
+      <nav>
+        <ul>
+          <li><a href="#intro">Введение</a></li>
+          <li><a href="#dac">DAC</a></li>
+          <li><a href="#mac">MAC</a></li>
+          <li><a href="#compare">Сравнение</a></li>
+          <li><a href="#attacks">Атаки</a></li>
+          <li><a href="Practice.html">Сценарии</a></li>
+          <li><a href="Politics.html">Редактор политики</a></li>
+          <li><a href="FileManager.html">Файловый менеджер</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Механизмы контроля доступа в ОС</h1>
+  <p class="note" style="font-size: 1.2rem; margin-bottom: 2rem;">
+    Сравнение дискреционного (DAC) и мандатного (MAC) подходов на примере Linux и Windows
+  </p>
+
+  <!-- Введение -->
+  <section id="intro">
+    <h2>Введение в контроль доступа</h2>
+
+    <div class="card">
+      <h3>Что такое модель управления доступом?</h3>
+      <p>Это формализованная система правил, определяющая, кто (субъект) и каким образом может взаимодействовать с какими ресурсами (объектами) в информационной системе.</p>
+
+      <h3 style="margin-top: 1.5rem;">Основная цель</h3>
+      <p>Предотвращение несанкционированного доступа к ресурсам, обеспечение <strong>конфиденциальности, целостности и доступности</strong> информации.</p>
+
+      <h3>Основные принципы</h3>
+      <ul style="margin-left: 2rem;">
+        <li><strong>Минимальные привилегии</strong> — пользователь получает только необходимые права</li>
+        <li><strong>Разделение обязанностей</strong> — критические операции требуют нескольких участников</li>
+        <li><strong>Аудируемость</strong> — все действия логируются</li>
+        <li><strong>Защита по умолчанию</strong> — доступ запрещён, если явно не разрешён</li>
+      </ul>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <span class="badge dac">DAC</span>
+        <h3>Дискреционный</h3>
+        <p>Владелец сам управляет правами</p>
+      </div>
+      <div class="card">
+        <span class="badge mac">MAC</span>
+        <h3>Мандатный</h3>
+        <p>Централизованная политика</p>
+      </div>
+      <div class="card">
+        <span class="badge" style="background: rgba(156, 39, 176, 0.2); color: #9c27b0; border-color: #9c27b0;">RBAC/ABAC</span>
+        <h3>Ролевой/Атрибутный</h3>
+        <p>Роли и атрибуты</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAC -->
+  <section id="dac">
+    <h2>DAC (Discretionary Access Control)</h2>
+
+    <div class="card">
+      <h3>Определение и особенности</h3>
+      <p><strong>DAC</strong> — владелец объекта самостоятельно определяет права доступа.</p>
+
+      <div class="grid-2" style="margin-top: 1.5rem;">
+        <div>
+          <h4>✅ Преимущества</h4>
+          <ul>
+            <li>Простота и гибкость</li>
+            <li>Поддержка совместной работы</li>
+            <li>Понятен пользователям</li>
+          </ul>
+        </div>
+        <div>
+          <h4>❌ Недостатки</h4>
+          <ul>
+            <li>Зависимость от человеческого фактора</li>
+            <li>Сложность масштабирования</li>
+            <li>Риск избыточных прав</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>ACL (Access Control List)</h3>
+      <p>Техническая реализация DAC — список прав для объекта.</p>
+
+      <div class="code-block">
+                    <pre><code># Linux: просмотр прав
+ls -la /etc/passwd
+-rw-r--r-- 1 root root 1234 Feb 14 10:00 /etc/passwd
+# ↑вл. root (rw)  группа root (r)  остальные (r)
+
+# Linux: изменение прав
+chmod 600 secret.txt        # только владелец читает/пишет
+chown user:group file        # смена владельца
+
+# ACL (расширенный DAC)
+setfacl -m u:alice:rw file   # дать Алисе права
+getfacl file                  # посмотреть ACL</code></pre>
+      </div>
+
+      <h3>Windows DAC</h3>
+      <pre><code># PowerShell: просмотр ACL
+Get-Acl C:\Windows\System32 | Format-List
+
+# icacls — управление правами
+icacls файл /grant user:(R,W)
+icacls файл /remove user</code></pre>
+    </div>
+  </section>
+
+  <!-- MAC -->
+  <section id="mac">
+    <h2>MAC (Mandatory Access Control)</h2>
+
+    <div class="card">
+      <h3>Определение и особенности</h3>
+      <p><strong>MAC</strong> — доступ регулируется централизованной политикой на основе меток.</p>
+
+      <div class="grid-2">
+        <div>
+          <h4>✅ Преимущества</h4>
+          <ul>
+            <li>Высокая безопасность</li>
+            <li>Защита от утечек</li>
+            <li>Соответствие стандартам</li>
+          </ul>
+        </div>
+        <div>
+          <h4>❌ Недостатки</h4>
+          <ul>
+            <li>Сложность настройки</li>
+            <li>Снижение гибкости</li>
+            <li>Требует квалификации</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>🔴 SELinux (Linux)</h3>
+      <pre><code># Статус SELinux
+getenforce          # Enforcing/Permissive/Disabled
+sestatus            # Детальная информация
+
+# Контексты
+ls -Z               # Посмотреть контексты файлов
+ps auxZ             # Контексты процессов
+
+# Политики
+audit2allow -a      # Анализ запретов
+semodule -l         # Список модулей
+
+# Временное отключение (не рекомендуется!)
+setenforce 0        # Permissive mode</code></pre>
+
+      <h3>🟠 AppArmor (Ubuntu, SUSE)</h3>
+      <pre><code># Статус
+sudo aa-status
+
+# Профили
+sudo aa-complain /usr/bin/firefox  # Режим жалоб (лог)
+sudo aa-enforce /usr/bin/firefox    # Режим блокировки
+
+# Просмотр профиля
+cat /etc/apparmor.d/usr.bin.firefox</code></pre>
+
+      <h3>🔵 Windows MIC (Mandatory Integrity Control)</h3>
+      <pre><code># PowerShell: просмотр уровня целостности
+Get-Process -Id $pid | Select-Object Name, @{n="Integrity"; e={
+    (Get-Acl -Path "\\.\pipe\$($_.Name)").Sddl -match "S:(.*)"
+}}
+
+# Уровни: Low (браузеры), Medium (пользователь), High (админ), System</code></pre>
+    </div>
+  </section>
+
+  <!-- Сравнение -->
+  <section id="compare">
+    <h2>Сравнение DAC и MAC</h2>
+
+    <div class="table-container">
+      <table>
+        <thead>
+        <tr>
+          <th>Критерий</th>
+          <th>DAC</th>
+          <th>MAC</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Кто управляет?</td>
+          <td>Владелец объекта</td>
+          <td>Система/администратор</td>
+        </tr>
+        <tr>
+          <td>Гибкость</td>
+          <td>Высокая</td>
+          <td>Низкая</td>
+        </tr>
+        <tr>
+          <td>Безопасность</td>
+          <td>Зависит от пользователя</td>
+          <td>Централизованная</td>
+        </tr>
+        <tr>
+          <td>Примеры</td>
+          <td>chmod, NTFS ACL</td>
+          <td>SELinux, AppArmor, MIC</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="diagram">
+      <h3>Схема проверки доступа</h3>
+      <pre>
+┌─────────┐     ┌─────────┐     ┌─────────┐
+│ Субъект │────▶│   MAC   │────▶│   DAC   │────▶ Доступ
+└─────────┘     └─────────┘     └─────────┘
+                      │               │
+                      ▼               ▼
+                 Метки совп.     Права есть?
+                 (SELinux)        (chmod/ACL)
+                </pre>
+    </div>
+  </section>
+
+  <!-- Практика -->
+  <section id="practice">
+    <h2>Практические примеры</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Запуск веб-сервера</h3>
+        <p><strong>SELinux:</strong></p>
+        <pre><code># Контекст httpd должен быть httpd_t
+ps auxZ | grep httpd
+
+# Файлы должны быть httpd_sys_content_t
+ls -Z /var/www/html/</code></pre>
+
+        <p><strong>AppArmor:</strong></p>
+        <pre><code># Профиль разрешает только /var/www/**
+cat /etc/apparmor.d/usr.sbin.apache2</code></pre>
+
+        <p><strong>MIC (Windows):</strong></p>
+        <pre><code># Браузер (Low) не может писать в
+# папку пользователя (Medium)</code></pre>
+      </div>
+
+      <div class="card">
+        <h3>Попытка записи в /etc/shadow</h3>
+        <pre><code># DAC: права 644 — только root пишет
+ls -l /etc/shadow
+---------- 1 root root 1234 Feb 14 ...
+
+# SELinux: домен httpd_t не имеет доступа
+type=AVC msg=audit: denied { write }
+  for pid=1234 comm="httpd"
+  name="shadow" dev=...
+  scontext=system_u:system_r:httpd_t
+  tcontext=system_u:object_r:shadow_t</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Атаки -->
+  <section id="attacks">
+    <h2>Реальные атаки и защита MAC</h2>
+
+    <div class="attack-card">
+      <h3>Dirty Pipe (CVE-2022-0847)</h3>
+      <p><strong>Суть:</strong> Запись в файлы даже с read-only правами.</p>
+      <p><strong>Защита MAC:</strong> SELinux блокирует, если домен процесса не имеет доступа к типу файла.</p>
+    </div>
+
+    <div class="attack-card">
+      <h3>EternalBlue (MS17-010)</h3>
+      <p><strong>Суть:</strong> Запись в системную память.</p>
+      <p><strong>Защита MAC:</strong> MIC (Low → High Integrity) блокирует запись.</p>
+    </div>
+
+    <div class="attack-card">
+      <h3>Привилегированный контейнер</h3>
+      <p><strong>Суть:</strong> Доступ к хосту из контейнера.</p>
+      <p><strong>Защита MAC:</strong> AppArmor ограничивает даже root в контейнере.</p>
+    </div>
+
+    <div class="note">
+      <h3>⚠️ Ошибки конфигурации</h3>
+      <pre><code># НЕ ДЕЛАЙТЕ ТАК:
+setenforce 0                    # Отключение SELinux
+echo "SELINUX=disabled" > /etc/selinux/config
+
+# ПОСЛЕДСТВИЯ:
+# Система уязвима для 0-day
+# Привилегии пользователей не ограничены
+                </code></pre>
+    </div>
+  </section>
+
+  <!-- Лучшие практики -->
+  <section>
+    <h2>Лучшие практики</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Linux</h3>
+        <ul>
+          <li>Включить SELinux/AppArmor в enforcing-режиме</li>
+          <li>Использовать sudo с логированием</li>
+          <li>Регулярно проверять audit.log</li>
+          <li>semodule -l | grep disabled</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Windows</h3>
+        <ul>
+          <li>Включить и настроить MIC</li>
+          <li>Использовать групповые политики (GPO)</li>
+          <li>Ограничить права локального администратора</li>
+          <li>Включить Windows Defender Credential Guard</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>📋 Контрольные вопросы</h3>
+      <ol>
+        <li>У вас веб-сервер на Linux. Хакер получил shell www-data. Может ли он прочитать /etc/shadow?</li>
+        <li>Пользователь скачал вирус в Windows. Может ли он удалить system32?</li>
+        <li>Чем отличается процесс с setuid от обычного с точки зрения MAC?</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>Доклад по механизмам контроля доступа · Информационная безопасность</p>
+    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Сравнение DAC и MAC в Linux и Windows</p>
+  </div>
+</footer>
+</body>
+</html>

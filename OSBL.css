@@ -1,0 +1,700 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #00ff88;
+    --primary-dark: #00cc6a;
+    --secondary: #0099ff;
+    --danger: #ff4d4d;
+    --warning: #ffc107;
+    --dark: #0a0c0f;
+    --darker: #050607;
+    --light: #e0e0e0;
+    --gray: #2a2e35;
+    --card-bg: rgba(20, 25, 35, 0.9);
+    --border: rgba(0, 255, 136, 0.2);
+    --code-bg: #1e1e1e;
+    --success: #00cc6a;
+    --info: #0099ff;
+    --windows: #0078d7;
+    --linux: #4ecdc4;
+    --macos: #8e8e93;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--light);
+    line-height: 1.6;
+    background-color: var(--darker);
+    background-image:
+            linear-gradient(0deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(0, 255, 136, 0.03) 25%, rgba(0, 255, 136, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 136, 0.03) 75%, rgba(0, 255, 136, 0.03) 76%, transparent 77%, transparent);
+    background-size: 50px 50px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Шапка */
+header {
+    background: rgba(5, 6, 7, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+nav ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+nav a {
+    color: var(--light);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--primary);
+}
+
+/* Основной контент */
+main {
+    padding: 3rem 0;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-left: 4px solid var(--primary);
+    padding-left: 1.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin: 2.5rem 0 1.5rem;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 1rem;
+    color: var(--secondary);
+}
+
+h4 {
+    font-size: 1.2rem;
+    margin: 1rem 0 0.5rem;
+    color: var(--warning);
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.intro-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+/* Бейджи ОС */
+.comparison-badge {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.badge.windows {
+    background: rgba(0, 120, 215, 0.2);
+    color: var(--windows);
+    border: 1px solid rgba(0, 120, 215, 0.4);
+}
+
+.badge.linux {
+    background: rgba(78, 205, 196, 0.2);
+    color: var(--linux);
+    border: 1px solid rgba(78, 205, 196, 0.4);
+}
+
+.badge.macos {
+    background: rgba(142, 142, 147, 0.2);
+    color: var(--macos);
+    border: 1px solid rgba(142, 142, 147, 0.4);
+}
+
+/* Список задач */
+.tasks-list {
+    margin-left: 2rem;
+    margin-top: 1rem;
+}
+
+.tasks-list li {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.tasks-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* Схема загрузки Windows */
+.windows-boot-flow {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.boot-component {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    min-width: 200px;
+    transition: transform 0.3s;
+}
+
+.boot-component:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.component-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.boot-arrow {
+    font-size: 2rem;
+    color: var(--primary);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Структура BCD */
+.bcd-structure {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.bcd-entry {
+    display: grid;
+    grid-template-columns: 150px 250px 1fr;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bcd-entry:last-child {
+    border-bottom: none;
+}
+
+.entry-name {
+    font-weight: 600;
+    color: var(--primary);
+    font-family: monospace;
+}
+
+.entry-value {
+    font-family: monospace;
+    color: var(--warning);
+}
+
+.entry-desc {
+    color: #999;
+}
+
+/* Структура GRUB */
+.grub-structure {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.grub-stage {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    min-width: 180px;
+    transition: transform 0.3s;
+}
+
+.stage-number {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 0 auto 1rem;
+}
+
+.stage-arrow {
+    font-size: 2rem;
+    color: var(--primary);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Конфигурация GRUB */
+.grub-config {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.config-section {
+    margin-bottom: 1.5rem;
+}
+
+.config-section h4 {
+    margin-bottom: 1rem;
+    color: var(--warning);
+}
+
+.config-item {
+    padding: 0.5rem 0;
+    font-family: monospace;
+}
+
+.config-key {
+    color: var(--primary);
+    display: inline-block;
+    width: 250px;
+}
+
+.config-value {
+    color: var(--warning);
+}
+
+.config-comment {
+    color: #666;
+    margin-left: 1rem;
+}
+
+/* Меню GRUB */
+.grub-menu-entry {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    font-family: monospace;
+    font-size: 0.95rem;
+}
+
+.menu-line {
+    padding: 0.25rem 0;
+}
+
+.menu-line.indent {
+    padding-left: 2rem;
+}
+
+.line-number {
+    color: #666;
+    display: inline-block;
+    width: 30px;
+    text-align: right;
+    margin-right: 1rem;
+}
+
+.line-content {
+    color: var(--light);
+}
+
+/* Этапы загрузки ядра */
+.kernel-load-stages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.kernel-stage {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.kernel-stage:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.kernel-stage.active {
+    background: rgba(0, 255, 136, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+.stage-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Макет памяти */
+.memory-layout {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.memory-region {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 1rem;
+}
+
+.memory-region.kernel-region {
+    background: rgba(0, 255, 136, 0.1);
+    border-left: 4px solid var(--primary);
+}
+
+.region-name {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.region-desc {
+    color: #999;
+}
+
+/* Сетка конфигурации */
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.config-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.config-card:hover {
+    transform: translateY(-5px);
+}
+
+.config-card h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+/* Параметры ядра */
+.kernel-params {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.param-item {
+    display: grid;
+    grid-template-columns: 200px 150px 1fr;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.param-item:last-child {
+    border-bottom: none;
+}
+
+.param-name {
+    font-weight: 600;
+    color: var(--primary);
+    font-family: monospace;
+}
+
+.param-value {
+    font-family: monospace;
+    color: var(--warning);
+}
+
+.param-desc {
+    color: #999;
+}
+
+/* Восстановление */
+.recovery-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.recovery-step {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.step-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--primary);
+    color: var(--dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.recovery-step h4 {
+    margin-bottom: 1rem;
+    color: var(--warning);
+}
+
+.code-block.small {
+    margin: 1rem 0;
+    font-size: 0.85rem;
+}
+
+/* Предупреждения */
+.warning {
+    background: rgba(255, 77, 77, 0.1);
+    border-left: 4px solid var(--danger);
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.warning h4 {
+    color: var(--danger);
+    margin-bottom: 0.5rem;
+}
+
+.warning ul {
+    margin-left: 2rem;
+    margin-top: 0.5rem;
+}
+
+.warning li {
+    margin-bottom: 0.5rem;
+}
+
+/* Сравнительная таблица */
+.comparison-table {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 250px repeat(3, 1fr);
+    background: rgba(0, 255, 136, 0.1);
+    border-bottom: 2px solid var(--primary);
+    font-weight: 600;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 250px repeat(3, 1fr);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-cell {
+    padding: 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-cell:last-child {
+    border-right: none;
+}
+
+.table-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Код */
+.code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+}
+
+.code-block pre {
+    margin: 0;
+}
+
+.code-block code {
+    color: var(--primary);
+}
+
+/* Заметки */
+.note {
+    background: rgba(0, 255, 136, 0.1);
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.note h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Подвал */
+footer {
+    background: rgba(5, 6, 7, 0.9);
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    margin-top: 3rem;
+    text-align: center;
+    color: #666;
+}
+
+.footer-subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1200px) {
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .windows-boot-flow,
+    .grub-structure {
+        flex-direction: column;
+    }
+
+    .kernel-load-stages {
+        grid-template-columns: 1fr;
+    }
+
+    .comparison-table .table-header,
+    .comparison-table .table-row {
+        grid-template-columns: 1fr;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    nav ul {
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
